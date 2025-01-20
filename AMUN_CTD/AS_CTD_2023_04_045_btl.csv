@@ -1,0 +1,37 @@
+% Cruise_Number: 2023_04
+% Cruise_Name: 2023_04_AS
+% Original_Filename: CTD_2023_04_045.btl
+% Station: 15G
+% Cast_Number: 045
+% Start_Date_Time [UTC]: 2023-10-15T15:26:09
+% Initial_Latitude [deg]: 63.869167
+% Initial_Longitude [deg]: -79.814833
+% Sounding [m]: 295.0
+%
+% BOPO: Bottle position [  ]
+% SIGP: Sigma-Theta (rho(s, Theta, 0)-1000) [kg/m^3]
+% PRES: Sea Pressure (sea surface - 0) [decibars]
+% DEPH: Sensor Depth below Sea Surface [metres]
+% TE90: Temperature (1990 scale) [deg C]
+% OSOL: Oxygen solubility (Garcia & Gordon) [ml/l]
+% PSAL: Practical Salinity [psu]
+% SIGT: Sigma-T (rho(s, t, 0)-1000) [kg/m^3]
+% FLOR: Fluorescence [mg/m^3]
+% CDOM: Fluorescence of CDOM (Colored Dissolved Organic Matter) [mg/m^3]
+% PSAR: Photosynthetic Active Radiation [µeinsteins/s/m^2]
+% TRAN: Light Transmission [%]
+% OXYM: Dissolved Oxygen [µM]
+% SVEL: Sound Velocity [m/s]
+% NTRA: Nitrate (NO3-N) Content [mmol/m^3]
+%
+BOPO,SIGP,PRES,DEPH,TE90,OSOL,PSAL,SIGT,FLOR,CDOM,PSAR,TRAN,OXYM,SVEL,NTRA
+10,25.733,29.856,29.563,1.016,7.987,32.125,25.733,1.403,1.177,4.246,99.172,355.184,1450.420,2.431
+9,25.733,29.866,29.574,1.016,7.987,32.125,25.733,1.414,1.161,4.246,99.185,354.972,1450.420,2.530
+8,25.733,29.871,29.578,1.016,7.987,32.125,25.733,1.405,1.165,4.242,99.176,355.169,1450.420,2.229
+7,25.733,29.863,29.570,1.016,7.987,32.125,25.733,1.432,1.167,4.227,99.166,355.166,1450.420,2.385
+6,25.733,29.867,29.574,1.016,7.987,32.125,25.733,1.433,1.170,4.243,99.174,355.212,1450.420,2.627
+5,25.733,29.865,29.572,1.016,7.987,32.125,25.733,1.429,1.158,4.268,99.159,354.675,1450.420,2.665
+4,25.733,29.869,29.576,1.017,7.987,32.125,25.733,1.406,1.156,4.265,99.110,354.940,1450.420,2.496
+3,25.733,29.860,29.568,1.016,7.987,32.125,25.733,1.405,1.170,4.263,99.165,355.142,1450.420,2.606
+2,25.733,29.882,29.590,1.016,7.987,32.125,25.733,1.419,1.165,4.255,99.191,355.269,1450.420,2.583
+1,25.733,29.865,29.573,1.016,7.987,32.125,25.733,1.385,1.164,4.254,99.202,354.646,1450.420,2.347

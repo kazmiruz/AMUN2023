@@ -1,0 +1,30 @@
+% Cruise_Number: 2023_04
+% Cruise_Name: 2023_04_AS
+% Original_Filename: CTD_2023_04_024.btl
+% Station: FSB-01
+% Cast_Number: 024
+% Start_Date_Time [UTC]: 2023-10-10T07:08:19
+% Initial_Latitude [deg]: 68.758333
+% Initial_Longitude [deg]: -81.154333
+% Sounding [m]: 0.0
+%
+% BOPO: Bottle position [  ]
+% SIGP: Sigma-Theta (rho(s, Theta, 0)-1000) [kg/m^3]
+% PRES: Sea Pressure (sea surface - 0) [decibars]
+% DEPH: Sensor Depth below Sea Surface [metres]
+% TE90: Temperature (1990 scale) [deg C]
+% OSOL: Oxygen solubility (Garcia & Gordon) [ml/l]
+% PSAL: Practical Salinity [psu]
+% SIGT: Sigma-T (rho(s, t, 0)-1000) [kg/m^3]
+% FLOR: Fluorescence [mg/m^3]
+% CDOM: Fluorescence of CDOM (Colored Dissolved Organic Matter) [mg/m^3]
+% PSAR: Photosynthetic Active Radiation [µeinsteins/s/m^2]
+% TRAN: Light Transmission [%]
+% OXYM: Dissolved Oxygen [µM]
+% SVEL: Sound Velocity [m/s]
+% NTRA: Nitrate (NO3-N) Content [mmol/m^3]
+%
+BOPO,SIGP,PRES,DEPH,TE90,OSOL,PSAL,SIGT,FLOR,CDOM,PSAR,TRAN,OXYM,SVEL,NTRA
+24,24.472,2.976,2.946,0.524,8.180,30.524,24.472,2.045,1.557,0.224,85.593,357.213,1445.620,0.452
+2,24.472,2.921,2.892,0.524,8.180,30.524,24.472,2.067,1.555,0.230,85.637,356.509,1445.620,0.542
+1,24.471,2.956,2.926,0.522,8.180,30.524,24.471,2.358,1.550,0.236,85.668,357.610,1445.610,0.552

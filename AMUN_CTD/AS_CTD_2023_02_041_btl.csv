@@ -1,0 +1,29 @@
+% Cruise_Number: 2023_02
+% Cruise_Name: 2023_02_AS
+% Original_Filename: CTD_2023_02_041.btl
+% Station: 112
+% Cast_Number: 041
+% Start_Date_Time [UTC]: 2023-08-28T01:52:51
+% Initial_Latitude [deg]: 76.313333
+% Initial_Longitude [deg]: -72.675833
+% Sounding [m]: 559.0
+%
+% BOPO: Bottle position [  ]
+% SIGP: Sigma-Theta (rho(s, Theta, 0)-1000) [kg/m^3]
+% PRES: Sea Pressure (sea surface - 0) [decibars]
+% DEPH: Sensor Depth below Sea Surface [metres]
+% TE90: Temperature (1990 scale) [deg C]
+% OSOL: Oxygen solubility (Garcia & Gordon) [ml/l]
+% PSAL: Practical Salinity [psu]
+% SIGT: Sigma-T (rho(s, t, 0)-1000) [kg/m^3]
+% FLOR: Fluorescence [mg/m^3]
+% CDOM: Fluorescence of CDOM (Colored Dissolved Organic Matter) [mg/m^3]
+% PSAR: Photosynthetic Active Radiation [µeinsteins/s/m^2]
+% TRAN: Light Transmission [%]
+% OXYM: Dissolved Oxygen [µM]
+% SVEL: Sound Velocity [m/s]
+% NTRA: Nitrate (NO3-N) Content [mmol/m^3]
+%
+BOPO,SIGP,PRES,DEPH,TE90,OSOL,PSAL,SIGT,FLOR,CDOM,PSAR,TRAN,OXYM,SVEL,NTRA
+2,27.557,555.259,548.723,0.210,8.037,34.332,27.556,0.082,1.333,0.038,93.540,254.241,1458.270,13.706
+1,27.557,555.176,548.641,0.211,8.037,34.332,27.556,0.083,1.325,0.040,93.531,254.297,1458.270,13.733
