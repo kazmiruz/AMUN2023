@@ -297,7 +297,7 @@ for (col_name in colnames(ctd.nut.amun %>%
   # Create the boxplot with jitter
   num_var_plot <- ggplot(data_to_plot, aes(x = geo_loc_name, y = .data[[col_name]])) +
     geom_boxplot(aes(color = geo_loc_name), outlier.shape = NA, lwd = 0.3) +
-    geom_jitter(width = 0.3, size = 0.7, aes(color = geo_loc_name)) +      # Add data points
+    geom_jitter(width = 0.3, size = 0.7, aes(color = geo_loc_name)) +          # Add data points
     scale_color_manual(values = custom_colors) +
     scale_x_discrete(limits = region_names) +                                  # Consistent x-axis order
     labs(title = paste(col_name, "in the regions sampled"), 
@@ -403,7 +403,7 @@ print(nitrate_plot) # add the ANOVA plot to the pdf
 
 
 #
-## Create a PCA biplot with geo_loc_name centroids
+## Create a PCA plot with regional centroids
 
 # Get appropriate parameters for the PCA
 pca_data <- ctd.nut.amun %>%
@@ -450,12 +450,12 @@ pca_plot <- ggplot() +
                   point.padding = 0,                 # padding around arrowheads
                   force = 15,                        # repelling force for label spacing
                   force_pull = 1,                    # keep labels associated with arrows
-                  segment.color = "gray70",          # connectors
+                  segment.color = "grey70",          # connectors
                   segment.size = 0.3,                # connectors
                   seed = 7) +
   scale_color_manual(values = custom_colors, name = "Regions") +
   coord_cartesian(xlim = c(-3, 2)) +  # Restrict x-axis range
-  labs(title = "PCA biplot of CTD and nutrient parameters for the regions sampled",
+  labs(title = "PCA plot of CTD and nutrient parameters for the regions sampled",
        x = paste0("PC1 (", explained_variance[1], "%)"),
        y = paste0("PC2 (", explained_variance[2], "%)")) +
   theme_minimal() +
@@ -468,6 +468,101 @@ pca_plot <- ggplot() +
         legend.title = element_text(size = 16, face = "bold"))
 
 print(pca_plot) # Add the PCA plot to the pdf
+
+
+#
+## Create a PCA plot with individual points colored by region
+
+# Step 1: Filter numeric data and remove unwanted columns
+pca_data <- ctd.nut.amun %>%
+  select(where(is.numeric)) %>%
+  select(-all_of(c("Cast", "Longitude [deg]", "Latitude [deg]", "Year", "Month", "Day",
+                   "Sea Pressure [db]", "Bottle", "Bot. Depth [m]",
+                   "Sigma-T [kg/m^3]", "Sigma-Theta [kg/m^3]", "Sound Velocity [m/s]",
+                   "Oxygen solubility [ml/l]", "Light Transmission [%]",
+                   "Nitrate CTD [uM]"))) %>%
+  na.omit() %>%
+  select(where(~ var(.) > 0))  # Remove constant/zero-variance columns
+
+# Step 2: Perform PCA on the filtered data
+pca_result <- prcomp(pca_data, scale. = TRUE)
+
+# Step 3: Perform ANOVA to find significant variables
+anova_results <- data.frame(
+  parameter = colnames(pca_data),
+  p_value = sapply(colnames(pca_data), function(param) {
+    anova(lm(pca_result$x[, 1] ~ pca_data[[param]]))$`Pr(>F)`[1]
+  })
+)
+
+# Step 4: Filter significant parameters based on p-value < 0.05
+significant_params <- anova_results %>%
+  filter(p_value < 0.05) %>%
+  pull(parameter)
+
+# Step 5: Re-filter PCA data to include only significant parameters
+pca_data_filtered <- pca_data %>%
+  select(all_of(significant_params))
+
+# Recalculate PCA with filtered data
+pca_result_filtered <- prcomp(pca_data_filtered, scale. = TRUE)
+
+# Step 6: Add region grouping
+group_data <- ctd.nut.amun %>%
+  select(geo_loc_name) %>%
+  mutate(geo_loc_name = str_remove(geo_loc_name, "Canada: ")) %>%
+  .[rownames(pca_data_filtered), , drop = FALSE]  # Ensure matching rows
+
+# Step 7: Create PCA scores for plotting
+pca_scores <- as.data.frame(pca_result_filtered$x) %>%
+  mutate(Group = group_data$geo_loc_name) %>%
+  mutate(Group = factor(Group, levels = region_names))
+
+# Calculate variance explained
+explained_variance <- round(100 * pca_result_filtered$sdev^2 / sum(pca_result_filtered$sdev^2), 1)
+
+# Step 8: Make PCA plot with points colored by region
+# Extend arrows for parameters and make sample dots smaller and semi-transparent
+pca_plot <- ggplot() +
+  # Plot PCA sample dots, making them smaller and semi-transparent
+  geom_point(data = pca_scores %>%
+               filter(abs(PC1) <= quantile(abs(PC1), 0.99) & abs(PC2) <= quantile(abs(PC2), 0.99)), # Remove extreme 1% of points
+             aes(x = PC1, y = PC2, color = Group),
+             size = 0.6) +                                                                          # Adjust size
+  # Add parameter arrows with extended length
+  geom_segment(data = as.data.frame(pca_result_filtered$rotation),
+               aes(x = 0, y = 0, xend = PC1 * 8, yend = PC2 * 8),  # Extend arrow length
+               arrow = arrow(length = unit(0.3, "cm")), color = "grey40", linewidth = 0.5) +
+  # Add parameter labels, avoiding overlap
+  geom_text_repel(data = as.data.frame(pca_result_filtered$rotation) %>%
+                    mutate(parameter = str_remove(rownames(pca_result_filtered$rotation), "\\[.*\\]")),
+                  aes(x = PC1*8, y = PC2*8, label = parameter),
+                  color = "black", size = 3, fontface = 'bold',
+                  max.overlaps = Inf,                # all labels are displayed
+                  box.padding = 1,                 # padding around labels
+                  point.padding = 0,                 # padding around arrowheads
+                  force = 15,                        # repelling force for label spacing
+                  force_pull = 5,                    # keep labels associated with arrows
+                  segment.color = "grey70",          # connectors
+                  segment.size = 0.3,                # connectors
+                  seed = 7) +
+  # Apply consistent color scheme for regions
+  scale_color_manual(values = custom_colors, name = "Regions") +
+  # Add labels and title
+  labs(title = "PCA plot of significant CTD and nutrient parameters for the regions sampled",
+       x = paste0("PC1 (", explained_variance[1], "%)"),
+       y = paste0("PC2 (", explained_variance[2], "%)")) +
+  # Enhance plot appearance
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 12),
+        axis.title.x = element_text(size = 14, face = "bold"),
+        axis.title.y = element_text(size = 14, face = "bold"),
+        plot.margin = margin(t = 40, r = 60, b = 40, l = 60),            # Add left and right margins
+        legend.text = element_text(size = 14),
+        legend.title = element_text(size = 16, face = "bold"))
+
+print(pca_plot)
 
 dev.off() # close the pdf
 
