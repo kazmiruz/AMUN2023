@@ -57,11 +57,11 @@ amun_sample <- bind_rows(amun_sample_leg2, amun_sample_leg4) %>%
          "dna.conc" = "DNAavg, ng/μl",
          "box" = "DNA Box") %>%
   # mutate(dna.conc = round(dna.conc, 2)) %>% # round to two decimal places
-  mutate(volume.l = round(dna.conc, 1)) %>% # round to two decimal places
-  mutate(Date = dmy(Date),                    # Convert to Date format
-         Year = year(Date),                   # Extract year
-         Month = month(Date)) %>%             # Extract month
-                                              # do not extract any more than that b/c time/day might be different (e.g., UTC vs local)
+  mutate(volume.l = round(volume.l, 1)) %>% # round to two decimal places
+  mutate(Date = dmy(Date),              # Convert to Date format
+         Year = year(Date),             # Extract year
+         Month = month(Date)) %>%       # Extract month
+                                        # do not extract any more than that b/c time/day might be different (e.g., UTC vs local)
   filter(dna.conc >= 0.5) # select DNA concentrations 0.5 ng/μl b/c only these were sent
 
 
@@ -140,9 +140,10 @@ amun_sample_river <- read_csv("AMUN_DNA/Amundsen_sampling_2023_Leg4_csv.csv") %>
          Month = month(`Date`),                 # Extract month
          Day = day (`Date`),
          `Sampling Time` = NA) %>%             
-  mutate(`yyyy-mm-ddThh:mm:ss.sss` = paste0(sprintf("%04d", Year), "-",                              # Format Year as 4 digits
-                                            sprintf("%02d", Month), "-",                             # Format Month as 2 digits
-                                            sprintf("%02d", Day), "T00:00:00"))                      # Format Day as 2 digits and add "T"
+  mutate(`yyyy-mm-ddThh:mm:ss.sss` = paste0(sprintf("%04d", Year), "-",                    # Format Year as 4 digits
+                                            sprintf("%02d", Month), "-",                   # Format Month as 2 digits
+                                            sprintf("%02d", Day), "T00:00:00")) %>%        # Format Day as 2 digits and add "T"
+  mutate(DOY = yday(as.Date(paste(Year, Month, Day, sep = "-"))))                          # Compute DOY using lubridate
 
 
 #
@@ -155,7 +156,7 @@ meta.amun.complete <- dna.amun %>%
               anti_join(cast_duplicates, by = c("Station", "Cast")),        # Exclude station-casts that were not sampled
             by = c("Cruise", "Station", "Year", "Month", "Bottle")) %>%     # Join keys
   select(all_of(c("Cruise", "Station", "Cast", "Latitude [deg]", "Longitude [deg]", "geo_loc_name",
-                  "yyyy-mm-ddThh:mm:ss.sss", "Year", "Month", "Day", "Time", "Bot. Depth [m]", 
+                  "yyyy-mm-ddThh:mm:ss.sss", "Year", "Month", "Day", "Time", "DOY", "Bot. Depth [m]", 
                   "Depth [m]", "Sea Pressure [db]", "Bottle")), everything()) %>%
   mutate(`Latitude [deg]` = case_when(
     Station == "AMD23-29" ~ as.numeric(amun_sample_river %>% filter(Station == "AMD23-29") %>% pull(Latitude)),
@@ -176,7 +177,11 @@ meta.amun.complete <- dna.amun %>%
     Day = case_when(
       Station == "AMD23-29" ~ as.numeric(amun_sample_river %>% filter(Station == "AMD23-29") %>% pull(Day)),
       Station == "AMD23-6" ~ as.numeric(amun_sample_river %>% filter(Station == "AMD23-6") %>% pull(Day)),
-      TRUE ~ as.numeric(Day)))                # Retain existing values as numeric
+      TRUE ~ as.numeric(Day)),                # Retain existing values as numeric
+    DOY = case_when(
+      Station == "AMD23-29" ~ as.numeric(amun_sample_river %>% filter(Station == "AMD23-29") %>% pull(DOY)),
+      Station == "AMD23-6" ~ as.numeric(amun_sample_river %>% filter(Station == "AMD23-6") %>% pull(DOY)),
+      TRUE ~ as.numeric(DOY)))                # Retain existing values as numeric
 
 
 ##########################
@@ -287,11 +292,12 @@ mimarks.amun <- meta.amun.complete %>%
                           ifelse(`Latitude [deg]` >= 0, " N ", " S "),    # Add "N" or "S" based on the sign
                           sprintf("%.5f", abs(`Longitude [deg]`)),        # Format longitude to 5 decimal places
                           ifelse(`Longitude [deg]` >= 0, " E", " W")),    # Add "E" or "W" based on the sign
-         size_frac_low = case_when(seq.filt == 0 ~ prefilter.size,  # If seq.filt is 0, use prefilter.size
-                                   seq.filt == 1 & pore.size == 0.22 ~ 3,             # If seq.filt is 1 and pore.size is 0.22, set to 3
-                                   seq.filt == 1 & pore.size == 3 ~ 20,               # If seq.filt is 1 and pore.size is 3, set to 20
-                                   seq.filt == 1 & pore.size == 20 ~ prefilter.size,  # If seq.filt = 1 & pore.size = 20, use prefilter.size
-                                   TRUE ~ NA_real_),                                  # Default to NA if none of the above conditions are met
+         size_frac_low = case_when(
+           seq.filt == 0 ~ prefilter.size,  # If seq.filt is 0, use prefilter.size
+           seq.filt == 1 & pore.size == 0.22 ~ 3,                         # If seq.filt is 1 and pore.size is 0.22, set to 3
+           seq.filt == 1 & pore.size == 3 ~ 20,                           # If seq.filt is 1 and pore.size is 3, set to 20
+           seq.filt == 1 & pore.size == 20 ~ prefilter.size,              # If seq.filt = 1 & pore.size = 20, use prefilter.size
+           TRUE ~ NA_real_),                                              # Default to NA if none of the above conditions are met
          samp_store_temp = "-80") %>%
   select(-"Latitude [deg]", -"Longitude [deg]", -"Year", -"Month", -"Day", -"Time") %>%
   select (all_of(c("genohub.id", "organism", "yyyy-mm-ddThh:mm:ss.sss", "Depth [m]", "Bot. Depth [m]", "env_broad_scale", "env_local_scale", "env_medium", "geo_loc_name", "lat_lon", "size_frac_low", "pore.size", "volume.l", "samp_store_temp", "Temperature [deg C]", "Salinity", "Dissolved Oxygen [uM]", "PAR [uE/s/m^2]", "Fluorescence [mg/m^3]", "Nitrate [uM]", "Nitrite [uM]", "Phosphate [uM]", "Silicate [uM]")), everything()) %>%

@@ -9,12 +9,12 @@ library(ggrepel)
 #####################
 ### CTD compiling ###
 
-ctd <- "AMUN_CTD" # define the folder containing the metadata CSV files
+ctd <- "AMUN_CTD"                                                    # define the folder containing the metadata CSV files
 csv_files <- list.files(ctd, pattern = "\\.csv$", full.names = TRUE) # list all CSV files in the folder
 
-meta_list <- list() # initialize an empty list to store data frames
+meta_list <- list()                                                  # initialize an empty list to store data frames
 
-# Loop through each CSV file (aka cast)
+### Read each CTD file (aka cast) and nest them together
 for (file in csv_files) {
   # Read the first 9 rows to extract basic metadata (cruise, cast, date, etc.)
   basic_meta_raw <- read.csv(file, nrows = 9, header = FALSE, stringsAsFactors = FALSE)
@@ -36,9 +36,11 @@ for (file in csv_files) {
   meta_list[[file]] <- meta
 }
 
-# Combine all casts into a single data frame and wrangle
 
+### Combine all casts into a single data frame and wrangle
 ctd.amun <- bind_rows(meta_list) %>%
+  
+  # Renaming and fixing variables
   rename("Bottle" = "BOPO",
          "Sigma-Theta [kg/m^3]" = "SIGP",
          "Sea Pressure [db]" = "PRES",
@@ -62,7 +64,7 @@ ctd.amun <- bind_rows(meta_list) %>%
   filter(Station != "test") %>%
   mutate(Cruise = case_when(Cruise == "2023_02" ~ "KEBABB",
                             Cruise == "2023_04" ~ "FOXSIPP"),
-         Cast = as.numeric(Cast),   # removing zeroes in front of numbers
+         Cast = as.numeric(Cast),                                      # removing zeroes in front of numbers
          `Latitude [deg]` = as.numeric(`Latitude [deg]`),
          `Longitude [deg]` = as.numeric (`Longitude [deg]`),
          Year = as.numeric(substring(`Start_Date_Time [UTC]`, 1, 4)),  # Extract Year
@@ -70,8 +72,21 @@ ctd.amun <- bind_rows(meta_list) %>%
          Day = as.numeric(substring(`Start_Date_Time [UTC]`, 9, 10)),  # Extract Day
          Time = substring(`Start_Date_Time [UTC]`, 12),                # Extract Time
          `Bot. Depth [m]` = as.numeric(`Bot. Depth [m]`),
-         `Bot. Depth [m]` = if_else(`Bot. Depth [m]` < `Depth [m]`, NA_real_, `Bot. Depth [m]`))  %>%           
-  select (- "Cruise_Name", - "Original_Filename", - "Start_Date_Time [UTC]") %>%
+         `Bot. Depth [m]` = if_else(`Bot. Depth [m]` < `Depth [m]`, NA_real_, `Bot. Depth [m]`)) %>%
+  
+  # Calculate light attenuation coefficient: Kirk, JTO. 1983. Light and photosynthesis ecosystems. Cambridge University.
+  group_by(Station, Cast) %>%                                          # Group by Station and Cast to 
+  mutate(E0 = `PAR [uE/s/m^2]`[which.min(`Depth [m]`)],                # Surface PAR (Max PAR at Depth 0)
+         `Light Attenuation Coefficient [1/m]` = if_else(
+           `Depth [m]` > 0 & `PAR [uE/s/m^2]` > 0,                     # Apply formula only if depth > 0 & valid PAR
+           (1 / `Depth [m]`) * log(E0 / `PAR [uE/s/m^2]`),             # Kd = 1/z*ln (E0/Ez)
+                 NA_real_),
+         `Light Attenuation Coefficient [1/m]` = if_else(              # Remove negative Kd values in the same mutate call
+           `Light Attenuation Coefficient [1/m]` < 0, 0, `Light Attenuation Coefficient [1/m]`)) %>%
+           ungroup() %>%                                               # Remove grouping
+
+  # Removing extra columns and fixing station names
+  select (- "Cruise_Name", - "Original_Filename", - "Start_Date_Time [UTC]", -E0) %>%
   mutate(Station = Station %>%
            str_replace("D1''", "D1-2") %>%
            str_replace("A6/195", "A6") %>%
@@ -79,7 +94,10 @@ ctd.amun <- bind_rows(meta_list) %>%
            str_replace("A8/197", "A8") %>%
            str_replace("A9/198", "A9") %>%
            str_replace("Sal-01", "SAL-01")) %>%
+  
+  # Assign region
   mutate(geo_loc_name = map2_chr(`Latitude [deg]`, `Longitude [deg]`, get_region_name)) # region based on the natural_earth data
+
 
 #####################
 ### NUT wrangling ###
@@ -119,13 +137,14 @@ ctd.nut.amun <- ctd.amun %>%
   left_join(nut.amun, by = c(intersect(names(ctd.amun), names(nut.amun)))) %>%
   mutate(`yyyy-mm-ddThh:mm:ss.sss` = paste0(sprintf("%04d", Year), "-",                   # Format Year as 4 digits
                                             sprintf("%02d", Month), "-",                  # Format Month as 2 digits
-                                            sprintf("%02d", Day), "T",                  # Format Day as 2 digits and add "T"
+                                            sprintf("%02d", Day), "T",                    # Format Day as 2 digits and add "T"
                                             ifelse(is.na(Time), "00:00:00", Time))) %>%   # Use "00:00:00" if Time is NA
+  mutate(DOY = yday(as.Date(paste(Year, Month, Day, sep = "-")))) %>%                     # Compute DOY using lubridate
   select("Cruise", "Station", "Cast", "Latitude [deg]", "Longitude [deg]", "geo_loc_name",
-         "yyyy-mm-ddThh:mm:ss.sss", "Year", "Month", "Day", "Time", "Bot. Depth [m]", 
+         "yyyy-mm-ddThh:mm:ss.sss", "Year", "Month", "Day", "Time", "DOY", "Bot. Depth [m]", 
          "Depth [m]", "Sea Pressure [db]", "Bottle", "Temperature [deg C]", "Salinity", "Sigma-T [kg/m^3]", "Sigma-Theta [kg/m^3]",
          "Sound Velocity [m/s]", "Dissolved Oxygen [uM]", "Oxygen solubility [ml/l]",
-         "PAR [uE/s/m^2]", "Light Transmission [%]", "CDOM [mg/m^3]", 
+         "PAR [uE/s/m^2]", "Light Attenuation Coefficient [1/m]", "Light Transmission [%]", "CDOM [mg/m^3]", 
          "Fluorescence [mg/m^3]",  "Nitrate CTD [uM]", "Nitrate [uM]", "Nitrite [uM]", "Phosphate [uM]", "Silicate [uM]")
 
 
@@ -144,10 +163,10 @@ colnames(ctd.nut.amun)[sapply(ctd.nut.amun, function(col) !is.numeric(col))] # c
 pdf("OUTPUT/amun_parameters_hist.pdf", width = 8.5, height = 12)
 
 # Set up 4 plots per page
-par(mfrow = c(3, 2), mar = c(5, 6, 4, 3))  # 2 rows and 2 columns per page; wider left margin
+par(mfrow = c(3, 2), mar = c(5, 6, 4, 3))  # 3 rows and 2 columns per page; wider left margin
 
 # Loop through numeric columns
-for (col_name in names(ctd.nut.amun %>% select(-Cast, -Bottle))) {
+for (col_name in names(ctd.nut.amun %>% select(-Cast, -Year, -Day, -Bottle))) {
   # Check if the column is numeric
   if (is.numeric(ctd.nut.amun[[col_name]])) {
     # Extract the column, removing NA values
@@ -284,7 +303,7 @@ print(bot_dep) # push the boxplot for the station bottom depths to the pdf
 #
 ## Loop over numerical columns and create boxplots for them
 for (col_name in colnames(ctd.nut.amun %>%
-                          select(-all_of(c("Cast", "Year", "Month", "Day",
+                          select(-all_of(c("Cast", "Year", "Month", "Day", "DOY",
                                            "Depth [m]", "Sea Pressure [db]", "Bottle", "Bot. Depth [m]"))) %>%
                           select(where(is.numeric)))){
   
