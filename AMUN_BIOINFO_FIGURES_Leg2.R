@@ -24,12 +24,18 @@ source("AMUN_BIOINFO_ASV.R")
 
 #
 ### filter data
+<<<<<<< HEAD
 
 # Leg 2&4: there is a difference in filt. protocol (Leg 2: only 0.22 non-seq) and nut. data avail-ty (Leg 2: has nuts for all samples). 
 # While it is true that some 0.22 non-sequential filtration samples are from Leg 4, they are few and interfere w/ Leg 2 clustering.
 # While deep Amundsen samples cluster separately, they're included in the analysis due to lack of clear depth sep-n and for comparison.
 
 # Hence, here, Leg 2 is analysed completely and separately from Leg 4.
+=======
+# Since there is a big difference in filtration protocol and env. data avail-ty btwn Leg 2 and Leg 4, Leg 2 is looked at separately.
+# While it is true that some 0.22 non-seqiential filtration samples are from Leg 4, they are very few of those.
+# It was also found that deeper Amundsen samples (~100 m +) cluster separately from other the surface ones.
+>>>>>>> 1266ca155daf646c4adce3d7719e777e811d11ee
 
 meta_leg2 <- meta.amun.small %>%
   filter(Cruise == "KEBABB") %>%              # 97 of Leg 2 samples from 186 in total

@@ -24,7 +24,11 @@ source("AMUN_BIOINFO_ASV.R")
 
 #
 ### What does your ASV table look like in terms of data distribution? What normalization should you apply?
+<<<<<<< HEAD
 # Apply one of these transformation for optimal clustering, choose based on visual inspection of the elbow/silhouette and heatmaps
+=======
+# Apply one of these transformation for optimal clustering, hoose based on visual inspection of the elbow/silhouette and heatmaps
+>>>>>>> 1266ca155daf646c4adce3d7719e777e811d11ee
 hist(as.matrix(proptab.small.taxan.saman))         # looks pretty bad
 hist(as.matrix(proptab.small.taxan.saman)^0.5)     # looks better
 hist(as.matrix(proptab.small.taxan.saman)^0.25)    # looks good: a lot of 0s but normal distribution to the left
