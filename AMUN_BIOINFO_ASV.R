@@ -119,8 +119,7 @@ proptab.small.taxan.shortrow <- proptab.small.taxan %>%
 
 #
 ### Load metadata specific to the Amundsen samples analysed and reorder to match the ASV table
-meta.amun.small <- read_csv("OUTPUT/meta.amun.complete.csv") %>%
-  # filter (seq.filt == 0) %>%
+meta.amun.small <- read.csv("OUTPUT/meta.amun.complete.csv", stringsAsFactors = FALSE, check.names = FALSE) %>%
   mutate(plate.geno = case_when(
     plate.geno %in% c("7_am1-153200", "7_am2-BGC-Argo200") ~ paste0(plate.geno, "m"),  # Append "m" if match
     TRUE ~ plate.geno)) %>%                                                            # Keep as is otherwise

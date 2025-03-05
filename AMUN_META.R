@@ -111,7 +111,8 @@ setdiff(amun_genohub$sample.id, dna.amun$sample.id)
 ###############################################
 ### Attach CTD and NUT data to the DNA data ###
 
-# should have ctd.nut.amun off of AMUN_CTD_NUT.R
+# should have ctd.nut.amun or ctd.nut.kebabb off of AMUN_CTD_NUT_KEBABB.R
+ctd.nut.kebabb <- read.csv("OUTPUT/ctd.nut.kebabb.csv", stringsAsFactors = FALSE, check.names = FALSE)
 
 #
 ## before you start, check where you had a 2 casts per station
@@ -131,7 +132,7 @@ cast_duplicates <- data.frame(
 
 
 #
-## since ctd.nut.amun lacks river data, extract and modify river data to add to the main spreadsheet
+## since ctd.nut.kebabb lacks river data, extract and modify river data to add to the main spreadsheet
 amun_sample_river <- read_csv("AMUN_DNA/Amundsen_sampling_2023_Leg4_csv.csv") %>%
   filter(str_detect(Station, "AMD")) %>%                                              # need this to pull data for the rivers separate
   mutate(geo_loc_name = map2_chr(`Latitude`, `Longitude`, get_region_name)) %>%  # region based on the natural_earth data
@@ -147,13 +148,13 @@ amun_sample_river <- read_csv("AMUN_DNA/Amundsen_sampling_2023_Leg4_csv.csv") %>
 
 
 #
-## append ctd.nut.amun to dna.amun and add river data
+## append ctd.nut.kebabb to dna.amun and add river data
 
-intersect(names(dna.amun), names(ctd.nut.amun))                                       # check common columns
+intersect(names(dna.amun), names(ctd.nut.kebabb))                           # check common columns
 
 meta.amun.complete <- dna.amun %>%
-  left_join(ctd.nut.amun %>%
-              anti_join(cast_duplicates, by = c("Station", "Cast")),        # Exclude station-casts that were not sampled
+  left_join(ctd.nut.kebabb %>%
+              anti_join(cast_duplicates, by = c("Station", "Cast")),        # If more than 1 cast/station, exclude the one not sampled
             by = c("Cruise", "Station", "Year", "Month", "Bottle")) %>%     # Join keys
   select(all_of(c("Cruise", "Station", "Cast", "Latitude [deg]", "Longitude [deg]", "geo_loc_name",
                   "yyyy-mm-ddThh:mm:ss.sss", "Year", "Month", "Day", "Time", "DOY", "Bot. Depth [m]", 
@@ -191,7 +192,7 @@ meta.amun.complete <- dna.amun %>%
 ### Check bottle and DNA concentrations at the target depths for validity and potential patterns
 
 # Open pdf
-pdf("OUTPUT/amun_micb_sampling_validity.pdf", width = 12, height = 8.5) # A4 proportions
+pdf("OUTPUT/PARAM/amun_micb_sampling_validity.pdf", width = 12, height = 8.5) # A4 proportions
 
 #
 ## Check Niskin bottles at the target depths
@@ -293,7 +294,7 @@ mimarks.amun <- meta.amun.complete %>%
                           sprintf("%.5f", abs(`Longitude [deg]`)),        # Format longitude to 5 decimal places
                           ifelse(`Longitude [deg]` >= 0, " E", " W")),    # Add "E" or "W" based on the sign
          size_frac_low = case_when(
-           seq.filt == 0 ~ prefilter.size,  # If seq.filt is 0, use prefilter.size
+           seq.filt == 0 ~ prefilter.size,                                # If seq.filt is 0, use prefilter.size
            seq.filt == 1 & pore.size == 0.22 ~ 3,                         # If seq.filt is 1 and pore.size is 0.22, set to 3
            seq.filt == 1 & pore.size == 3 ~ 20,                           # If seq.filt is 1 and pore.size is 3, set to 20
            seq.filt == 1 & pore.size == 20 ~ prefilter.size,              # If seq.filt = 1 & pore.size = 20, use prefilter.size
