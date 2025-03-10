@@ -32,9 +32,6 @@ source("AMUN_BIOINFO_ASV.R")
 
 # Hence, here, Leg 2 is analysed completely and separately from Leg 4.
 
-# Since there is a big difference in filtration protocol and env. data avail-ty btwn Leg 2 and Leg 4, Leg 2 is looked at separately.
-# While it is true that some 0.22 non-seqiential filtration samples are from Leg 4, they are very few of those.
-# It was also found that deeper Amundsen samples (~100 m +) cluster separately from other the surface ones.
 
 meta_leg2 <- meta.amun.small %>%
   filter(Cruise == "KEBABB") %>%              # 97 of Leg 2 samples from 186 in total
@@ -651,6 +648,8 @@ dev.off()
 
 ###################################
 ### Environmental cluster stats ###
+# look at the parameters found to be significant as a result of the db-RDA analysis in defining microbial community clusters
+# can include some additional parameters, for example if they were exuded due to unavailability for a lot of samples
 # make a summary table for clusters
 cluster_summary <- proptab_leg2 %>%
   as.data.frame() %>%
@@ -733,7 +732,7 @@ asv_dominant_clus <- rownames(asv_clus)[apply(asv_clus, 2, which.max)]
 vertex_colors <- cluster_palette[asv_dominant_clus]                      # assign cluster colors
 vertex_colors[is.na(vertex_colors)] <- "gray"                            # default color for unassigned ASVs
 
-# Out of the ASVs most associated with each cluster, extract top 10 by relative abundance
+# Out of the ASVs most associated with each cluster, extract those with the highest relative abundant (e.g., >1%)
 # Notice: this is different from the most abundant ASVs per cluster!
 # Some ASVs may be very abundant in the cluster but NOT associated with it as they are more abundant in other clusters
 # Such ASVs may have bigger nods than Cluster-spec. ASVs, but the color is dif. - it is of the cluster they are more associated w/
