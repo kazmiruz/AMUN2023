@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<View collection="leg2_ODV" xview="0.23">
+<GeographicMap>
+<MapDomain lon_max="310.00000" lon_min="265.00000" lat_max="77.00000" lat_min="66.00000"/>
+<AutoMapLayerSettings lakes_and_rivers="T" coastline_fill="F"/>
+</GeographicMap>
+<MapWindow>
+<Axis create_labels="T" draw_grid="F" color="0"/>
+<Symbol size="-0.1" small_size="0.806126" color="1" type="0"/>
+<Window>
+<Geometry x_offset_bb="2" y_bottom="66" x_length_bb="7.5" y_projection="100" y_length_bb="4.7" x_projection="100" x_left="265" x_right="310" y_offset_bb="15.3" y_top="77"/>
+</Window>
+</MapWindow>
+<DataWindow>
+<Axis auto_label="T" draw_grid="F" axis_color="0" buddy_axis_sync="T"/>
+<AxisVariables>
+<!--Longitude-->
+<xAxis is_reversed="F" var_list="2" var_id="0"/>
+<!--Latitude-->
+<yAxis is_reversed="F" var_list="2" var_id="1"/>
+<!--Cluster @ DOY=first-->
+<zAxis is_reversed="F" var_list="2" var_id="4"/>
+</AxisVariables>
+<Modes window_mode="3" plot_mode="0" window_type="0"/>
+<Symbol size="3" small_size="1" color="0" type="0"/>
+<DataMark size="3.4" color="17"/>
+<Window>
+<Geometry x_offset_bb="11.5" y_bottom="66" x_length_bb="18" y_projection="100" y_length_bb="17.5" x_projection="100" x_left="265" x_right="310" y_offset_bb="2.5" y_top="77"/>
+<ColorScale palette_file_name="kazmiruk_6" z_range_end="6" z_range_start="1"/>
+<GraphicsObjects>
+<GObject dragging="F" clipping="F" post_data="T" own_coordinates="F" type="1" is_automatic="T">
+<Annotation x_coordinate="29.5" text_alignment="4" frame_color="-1" y_coordinate="18.6026473" background_color="-1" text="Cluster @ DOY=first" angle="0" frame_width="-1" font_size="16.1701" frame_type="0" text_color="0"/>
+</GObject>
+</GraphicsObjects>
+</Window>
+</DataWindow>
+<BasicVariables>
+<!--Depth [m]-->
+<Variable max_value="2250.000" var_id="4" min_value="0.000"/>
+<!--Temperature [deg C]-->
+<Variable max_value="7.000" var_id="7" min_value="-2.000"/>
+<!--Salinity-->
+<Variable max_value="35.000" var_id="8" min_value="23.000"/>
+<!--Sigma-T [kg/m^3]-->
+<Variable max_value="28.000" var_id="9" min_value="19.000"/>
+<!--Sigma-Theta [kg/m^3]-->
+<Variable max_value="28.000" var_id="10" min_value="19.000"/>
+<!--Fluorescence [mg/m^3]-->
+<Variable max_value="15.000" var_id="18" min_value="0.000"/>
+<!--Chla [mg/m^3]-->
+<Variable max_value="203.256" var_id="24" min_value="1.342"/>
+<!--Cluster-->
+<Variable max_value="6.000" var_id="49" min_value="1.000"/>
+</BasicVariables>
+<IsoSurfaceVariables>
+<!--Cluster @ DOY=first-->
+<IsoVariable surface_var_id="3" surface_value="first" var_id="49"/>
+<SampleSelectionCriteria>
+<SampleSelectionEntry var_ids="4">
+<RangeFilter max_value="6.000" min_value="1.000"/>
+</SampleSelectionEntry>
+</SampleSelectionCriteria>
+</IsoSurfaceVariables>
+</View>

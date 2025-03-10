@@ -1,186 +1,174 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <View xview="0.23" collection="leg2_ODV">
 <GeographicMap>
-<MapDomain lat_min="65.87108" lon_max="316.22088" lat_max="77.14492" lon_min="255.86512"/>
+<MapDomain lon_min="265.00000" lat_min="66.00000" lat_max="77.00000" lon_max="310.00000"/>
+<AutoMapLayerSettings lakes_and_rivers="T" land_topography="T"/>
 </GeographicMap>
 <MapWindow>
-<Axis draw_grid="F" create_labels="T" color="0"/>
-<Symbol small_size="0.333333" size="-0.1" type="0" color="1"/>
+<Axis color="0" draw_grid="F" create_labels="T"/>
+<Symbol color="1" size="-0.1" small_size="0.333333" type="0"/>
+<Annotation style="1" font_size="10"/>
 <Window>
-<Geometry x_left="255.865" y_offset_bb="12.5" y_bottom="65.8711" x_offset_bb="2" y_length_bb="8" y_top="77.1449" x_length_bb="13" x_right="316.221" x_projection="100" y_projection="100"/>
+<Geometry x_projection="100" x_offset_bb="2" y_offset_bb="14" x_length_bb="9.5" x_right="310" y_length_bb="6.5" x_left="265" y_projection="100" y_bottom="66" y_top="77"/>
 </Window>
 </MapWindow>
-<Section width="0.0198747">
-<xNodes>297.622,294.802,296.122,298.702,300.262,297.412,298.642</xNodes>
-<yNodes>69.7147,68.1924,67.3743,69.0963,68.221,67.3552,67.0032</yNodes>
+<Section width="0.01">
+<xNodes>281.836028,282.641455,283.550808,284.745958,285.525404,286.876443,288.409353,289.058891</xNodes>
+<yNodes>76.4314607,76.3820225,76.3490637,76.3161049,76.258427,76.3078652,76.3243446,76.3573034</yNodes>
 </Section>
-<PickedStations>
-<Station text_alignment="5" sequence_id="58" frame_width="1" accession_number="58" fill_color="4" frame_color="4" line_color="4" symbol_type="0" line_style="0"/>
-</PickedStations>
 <DataWindow>
-<Axis draw_grid="F" auto_label="T" axis_color="0"/>
-<AxisVariables>
-<!--Salinity-->
-<xAxis var_id="8" is_reversed="F" var_list="1"/>
-<!--Temperature [deg C]-->
-<yAxis var_id="7" is_reversed="F" var_list="1"/>
-<!--Cluster-->
-<zAxis var_id="49" is_reversed="F" var_list="1"/>
-</AxisVariables>
-<Modes window_type="0" window_mode="1" plot_mode="0"/>
-<Symbol small_size="1" size="1.5" type="0" color="0"/>
-<Window>
-<Geometry x_left="25" y_offset_bb="3" y_bottom="-2" x_offset_bb="1.5" y_length_bb="7.5" y_top="7" x_length_bb="13.5" x_right="35"/>
-<ColorScale z_range_start="1" z_range_end="6" palette_file_name="Google_turbo"/>
-<GraphicsObjects>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="15" text_alignment="4" background_color="-1" frame_width="-1" y_coordinate="10.86" frame_type="0" frame_color="-1" text_color="0" text="Cluster" font_size="12.7901" angle="0"/>
-</GObject>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="0.793893" text_alignment="2" background_color="-1" frame_width="-1" y_coordinate="6.75" frame_type="0" frame_color="-1" text_color="0" text="Temperature [deg C]" font_size="11.8063" angle="90"/>
-</GObject>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="8.25" text_alignment="1" background_color="-1" frame_width="-1" y_coordinate="2.38921" frame_type="0" frame_color="-1" text_color="0" text="Salinity" font_size="11.8063" angle="0"/>
-</GObject>
-</GraphicsObjects>
-</Window>
-</DataWindow>
-<DataWindow>
-<Axis draw_grid="F" auto_label="T" axis_color="0"/>
+<Axis auto_label="T" axis_color="0" draw_grid="F" buddy_axis_sync="T"/>
 <AxisVariables>
 <!--Section Distance [km]-->
-<xAxis var_id="200000" is_reversed="F" var_list="1"/>
+<xAxis var_id="200000" var_list="1" is_reversed="F"/>
 <!--Depth [m]-->
-<yAxis var_id="4" is_reversed="T" var_list="1"/>
-<!--Cluster-->
-<zAxis var_id="49" is_reversed="F" var_list="1"/>
-</AxisVariables>
-<Modes window_type="0" window_mode="2" plot_mode="0"/>
-<Line width="-1" style="0" color="0"/>
-<Symbol small_size="1" size="3.3" type="0" color="-1"/>
-<DataMark size="0.2" color="17"/>
-<OutlierFilter/>
-<Window>
-<Geometry x_left="0" y_offset_bb="15.5" y_bottom="900" x_offset_bb="18" y_length_bb="4.5" y_top="0" x_length_bb="11.5" x_right="864.522" x_projection="10"/>
-<ColorScale z_range_start="1" z_range_end="6" palette_file_name="Google_turbo"/>
-<GraphicsObjects>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="29.5" text_alignment="4" background_color="-1" frame_width="-1" y_coordinate="20.3356" frame_type="0" frame_color="-1" text_color="0" text="Cluster" font_size="10.9777" angle="0"/>
-</GObject>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="17.1668" text_alignment="2" background_color="-1" frame_width="-1" y_coordinate="17.75" frame_type="0" frame_color="-1" text_color="0" text="Depth [m]" font_size="10.1333" angle="90"/>
-</GObject>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="23.75" text_alignment="1" background_color="-1" frame_width="-1" y_coordinate="14.9758" frame_type="0" frame_color="-1" text_color="0" text="Section Distance [km]" font_size="10.1333" angle="0"/>
-</GObject>
-</GraphicsObjects>
-</Window>
-</DataWindow>
-<DataWindow>
-<Axis draw_grid="F" auto_label="T" axis_color="0"/>
-<AxisVariables>
-<!--Section Distance [km]-->
-<xAxis var_id="200000" is_reversed="F" var_list="1"/>
-<!--Depth [m]-->
-<yAxis var_id="4" is_reversed="T" var_list="1"/>
+<yAxis var_id="4" var_list="1" is_reversed="T"/>
 <!--Fluorescence [mg/m^3]-->
-<zAxis var_id="18" is_reversed="F" var_list="1"/>
+<zAxis var_id="18" var_list="1" is_reversed="F"/>
 </AxisVariables>
-<Modes window_type="0" window_mode="2" plot_mode="7"/>
-<Symbol small_size="1" size="1.5" type="0" color="0"/>
-<Gridding auto_scale_lengths="T" draw_shaded="T" y_scale_length="1.56329" x_scale_length="5.61248"/>
+<Modes window_type="0" plot_mode="7" window_mode="2"/>
+<Symbol color="0" size="1.5" small_size="1" type="0"/>
+<Gridding y_scale_length="2.97738" x_scale_length="4.9058" auto_scale_lengths="T" draw_shaded="T"/>
 <BadEstimateHiding max_distance="3" hide="T"/>
-<DataMark size="0.2" color="17"/>
-<Window>
-<Geometry x_left="0" y_offset_bb="9" y_bottom="900" x_offset_bb="18" y_length_bb="4.5" y_top="0" x_length_bb="11.5" x_right="864.522" x_projection="10" y_projection="15"/>
-<ColorScale z_range_start="0" z_range_end="5.5" palette_file_name="Google_turbo"/>
+<DataMark color="17" size="0.6"/>
+<Window font_size_factor="0.9">
+<Geometry x_projection="10" x_offset_bb="14.5" y_offset_bb="2.5" x_length_bb="16.5" x_right="187.559979" y_length_bb="7" x_left="3.94181417" y_projection="1" y_bottom="650" y_top="1"/>
+<ColorScale z_range_start="0" non_linearity_start="-0.06875" auto_adjust_non_linearity="T" palette_file_name="GreenOnly" non_linearity_end="2.68125" z_range_end="5.5"/>
 <GraphicsObjects>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="29.5" text_alignment="4" background_color="-1" frame_width="-1" y_coordinate="13.8356" frame_type="0" frame_color="-1" text_color="0" text="Fluorescence [mg/m^3]" font_size="10.9777" angle="0"/>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="31" y_coordinate="9.82993939" text_alignment="4" font_size="12.1234" frame_color="-1" text_color="0" text="Fluorescence [mg/m^3]" frame_type="0" frame_width="-1" angle="0" background_color="-1"/>
 </GObject>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="17.1668" text_alignment="2" background_color="-1" frame_width="-1" y_coordinate="11.25" frame_type="0" frame_color="-1" text_color="0" text="Depth [m]" font_size="10.1333" angle="90"/>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="13.6486065" y_coordinate="6" text_alignment="2" font_size="11.1908" frame_color="-1" text_color="0" text="Depth [m]" frame_type="0" frame_width="-1" angle="90" background_color="-1"/>
 </GObject>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="23.75" text_alignment="1" background_color="-1" frame_width="-1" y_coordinate="8.47576" frame_type="0" frame_color="-1" text_color="0" text="Section Distance [km]" font_size="10.1333" angle="0"/>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="22.75" y_coordinate="1.85672288" text_alignment="1" font_size="11.1908" frame_color="-1" text_color="0" text="Section Distance [km]" frame_type="0" frame_width="-1" angle="0" background_color="-1"/>
 </GObject>
 </GraphicsObjects>
 </Window>
 </DataWindow>
 <DataWindow>
-<Axis draw_grid="F" auto_label="T" axis_color="0"/>
+<Axis auto_label="T" axis_color="0" draw_grid="F" buddy_axis_sync="T"/>
 <AxisVariables>
 <!--Section Distance [km]-->
-<xAxis var_id="200000" is_reversed="F" var_list="1"/>
+<xAxis var_id="200000" var_list="1" is_reversed="F"/>
 <!--Depth [m]-->
-<yAxis var_id="4" is_reversed="T" var_list="1"/>
-<!--Sigma-T [kg/m^3]-->
-<zAxis var_id="9" is_reversed="F" var_list="1"/>
+<yAxis var_id="4" var_list="1" is_reversed="T"/>
+<!--Cluster-->
+<zAxis var_id="49" var_list="1" is_reversed="F"/>
 </AxisVariables>
-<Modes window_type="0" window_mode="2" plot_mode="7"/>
-<Gridding auto_scale_lengths="T" draw_shaded="T" y_scale_length="1.56329" x_scale_length="5.61248"/>
-<BadEstimateHiding max_distance="3" hide="T"/>
-<DataMark size="0.2" color="17"/>
-<Window>
-<Geometry x_left="0" y_offset_bb="2.5" y_bottom="900" x_offset_bb="18" y_length_bb="4.5" y_top="0" x_length_bb="11.5" x_right="864.522" x_projection="10" y_projection="15"/>
-<ColorScale z_range_start="22.5" z_range_end="28" palette_file_name="Google_turbo"/>
+<Modes window_type="0" plot_mode="0" window_mode="2"/>
+<Line style="0" color="0" width="-1"/>
+<Symbol color="-1" size="4" small_size="1" type="0"/>
+<OutlierFilter/>
+<Window font_size_factor="0.9">
+<Geometry x_offset_bb="14.5" y_offset_bb="13" x_length_bb="16.5" x_right="187.559979" y_length_bb="7" x_left="3.94181417" y_projection="1" y_bottom="650" y_top="1"/>
+<ColorScale z_range_start="1" palette_file_name="kazmiruk_6" z_range_end="6"/>
 <GraphicsObjects>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="29.5" text_alignment="4" background_color="-1" frame_width="-1" y_coordinate="7.3356" frame_type="0" frame_color="-1" text_color="0" text="Sigma-T [kg/m^3]" font_size="10.9777" angle="0"/>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="31" y_coordinate="20.3299394" text_alignment="4" font_size="12.1234" frame_color="-1" text_color="0" text="Cluster" frame_type="0" frame_width="-1" angle="0" background_color="-1"/>
 </GObject>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="17.1668" text_alignment="2" background_color="-1" frame_width="-1" y_coordinate="4.75" frame_type="0" frame_color="-1" text_color="0" text="Depth [m]" font_size="10.1333" angle="90"/>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="13.6486065" y_coordinate="16.5" text_alignment="2" font_size="11.1908" frame_color="-1" text_color="0" text="Depth [m]" frame_type="0" frame_width="-1" angle="90" background_color="-1"/>
 </GObject>
-<GObject own_coordinates="F" type="1" post_data="T" is_automatic="T" dragging="F" clipping="F">
-<Annotation x_coordinate="23.75" text_alignment="1" background_color="-1" frame_width="-1" y_coordinate="1.97576" frame_type="0" frame_color="-1" text_color="0" text="Section Distance [km]" font_size="10.1333" angle="0"/>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="22.75" y_coordinate="12.3567229" text_alignment="1" font_size="11.1908" frame_color="-1" text_color="0" text="Section Distance [km]" frame_type="0" frame_width="-1" angle="0" background_color="-1"/>
+</GObject>
+</GraphicsObjects>
+</Window>
+</DataWindow>
+<DataWindow>
+<Axis auto_label="T" axis_color="0" draw_grid="F" buddy_axis_sync="T"/>
+<AxisVariables>
+<!--Temperature [deg C]-->
+<xAxis var_id="7" var_list="1" is_reversed="F"/>
+<!--Salinity-->
+<yAxis var_id="8" var_list="1" is_reversed="F"/>
+<!--Cluster-->
+<zAxis var_id="49" var_list="1" is_reversed="F"/>
+</AxisVariables>
+<Modes window_type="0" plot_mode="0" window_mode="1"/>
+<Symbol color="0" size="3" small_size="1" type="0"/>
+<OutlierFilter/>
+<Window font_size_factor="0.9">
+<Axis y_tic="1" y_tic_long="1"/>
+<Geometry x_offset_bb="2" y_offset_bb="2.5" x_length_bb="9.5" x_right="7" y_length_bb="9.5" x_left="-2" y_projection="15" y_bottom="24" y_top="35"/>
+<ColorScale z_range_start="1" palette_file_name="kazmiruk_6" z_range_end="6"/>
+<GraphicsObjects>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="11.5" y_coordinate="12.3301289" text_alignment="4" font_size="11.4667" frame_color="-1" text_color="0" text="Cluster" frame_type="0" frame_width="-1" angle="0" background_color="-1"/>
+</GObject>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="1.28199854" y_coordinate="7.25" text_alignment="2" font_size="10.5846" frame_color="-1" text_color="0" text="Salinity" frame_type="0" frame_width="-1" angle="90" background_color="-1"/>
+</GObject>
+<GObject post_data="T" own_coordinates="F" dragging="F" is_automatic="T" type="1" clipping="F">
+<Annotation x_coordinate="6.75" y_coordinate="1.89156829" text_alignment="1" font_size="10.5846" frame_color="-1" text_color="0" text="Temperature [deg C]" frame_type="0" frame_width="-1" angle="0" background_color="-1"/>
 </GObject>
 </GraphicsObjects>
 </Window>
 </DataWindow>
 <BasicVariables>
 <!--Depth [m]-->
-<Variable var_id="4" max_value="900.000" min_value="0.000"/>
+<Variable min_value="0.000" var_id="4" max_value="700.000"/>
 <!--Temperature [deg C]-->
-<Variable var_id="7" max_value="7.000" min_value="-2.000"/>
+<Variable min_value="-2.000" var_id="7" max_value="7.000"/>
 <!--Salinity-->
-<Variable var_id="8" max_value="35.000" min_value="25.000"/>
+<Variable min_value="23.000" var_id="8" max_value="35.000"/>
 <!--Sigma-T [kg/m^3]-->
-<Variable var_id="9" max_value="225.000" min_value="0.000"/>
+<Variable min_value="22.500" var_id="9" max_value="28.000"/>
+<!--Sigma-Theta [kg/m^3]-->
+<Variable min_value="19.000" var_id="10" max_value="28.000"/>
 <!--Fluorescence [mg/m^3]-->
-<Variable var_id="18" max_value="15.000" min_value="0.000"/>
+<Variable min_value="0.000" var_id="18" max_value="7.000"/>
+<!--Nitrate CTD [uM]-->
+<Variable min_value="0.000" var_id="19" max_value="20.000"/>
+<!--Nitrate [uM]-->
+<Variable min_value="0.000" var_id="20" max_value="20.000"/>
+<!--Nitrite [uM]-->
+<Variable min_value="0.000" var_id="21" max_value="0.350"/>
+<!--Phosphate [uM]-->
+<Variable min_value="0.200" var_id="22" max_value="1.400"/>
 <!--Chla [mg/m^3]-->
-<Variable var_id="24" max_value="203.256" min_value="1.342"/>
+<Variable min_value="1.342" var_id="24" max_value="203.256"/>
 <!--Cluster-->
-<Variable var_id="49" max_value="6.000" min_value="1.000"/>
+<Variable min_value="1.000" var_id="49" max_value="6.000"/>
 </BasicVariables>
+<DerivedVariables>
+<!--Expression [ln(m)]-->
+<Variable unit="ln(m)" var_id="32000" label="Expression" ulabel="Expression" uunit="ln(m)" type="45" digits_count="3">
+<Input>4</Input>
+<Expression>1 ln</Expression>
+</Variable>
+</DerivedVariables>
 <IsoSurfaceVariables>
 <!--geo_loc_name @ Cast=first-->
-<IsoVariable var_id="1" surface_value="first" surface_var_id="0"/>
+<IsoVariable var_id="1" surface_var_id="0" surface_value="first"/>
 <!--Time @ Cast=first-->
-<IsoVariable var_id="2" surface_value="first" surface_var_id="0"/>
+<IsoVariable var_id="2" surface_var_id="0" surface_value="first"/>
 <!--DOY @ Cast=first-->
-<IsoVariable var_id="3" surface_value="first" surface_var_id="0"/>
+<IsoVariable var_id="3" surface_var_id="0" surface_value="first"/>
 <!--Depth [m] @ Cast=first-->
-<IsoVariable var_id="4" surface_value="first" surface_var_id="0"/>
+<IsoVariable var_id="4" surface_var_id="0" surface_value="first"/>
 <!--Cluster @ target.depth=first-->
-<IsoVariable var_id="49" surface_value="first" surface_var_id="35"/>
+<IsoVariable var_id="49" surface_var_id="35" surface_value="first"/>
 <!--Cluster @ target.depth=last-->
-<IsoVariable var_id="49" surface_value="last" surface_var_id="35"/>
+<IsoVariable var_id="49" surface_var_id="35" surface_value="last"/>
 <!--Cluster @ Depth [m]=minimum-->
-<IsoVariable var_id="49" surface_value="minimum" surface_var_id="4"/>
+<IsoVariable var_id="49" surface_var_id="4" surface_value="minimum"/>
 <!--Cluster @ Cluster=first-->
-<IsoVariable var_id="49" surface_value="first" surface_var_id="49"/>
+<IsoVariable var_id="49" surface_var_id="49" surface_value="first"/>
 <!--Cluster @ Depth [m]=first-->
-<IsoVariable var_id="49" surface_value="first" surface_var_id="4"/>
+<IsoVariable var_id="49" surface_var_id="4" surface_value="first"/>
 <!--Cluster @ Cast=first-->
-<IsoVariable var_id="49" surface_value="first" surface_var_id="0"/>
+<IsoVariable var_id="49" surface_var_id="0" surface_value="first"/>
 <!--Cluster @ Cluster=last-->
-<IsoVariable var_id="49" surface_value="last" surface_var_id="49"/>
+<IsoVariable var_id="49" surface_var_id="49" surface_value="last"/>
 <SampleSelectionCriteria>
 <SampleSelectionEntry var_ids="4">
-<RangeFilter max_value="65.000" min_value="0.000"/>
+<RangeFilter min_value="0.000" max_value="65.000"/>
 </SampleSelectionEntry>
 </SampleSelectionCriteria>
 </IsoSurfaceVariables>
-<CurrentSelection stationID="59" sampleID="11"/>
+<VariableDisplayOrder>49,4,20,22,21,2,1,3,0,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,32000,200000</VariableDisplayOrder>
+<CurrentSelection stationID="14" sampleID="21"/>
 </View>

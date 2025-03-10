@@ -36,7 +36,6 @@ source("AMUN_BIOINFO_ASV.R")
 # While it is true that some 0.22 non-seqiential filtration samples are from Leg 4, they are very few of those.
 # It was also found that deeper Amundsen samples (~100 m +) cluster separately from other the surface ones.
 
-
 meta_leg2 <- meta.amun.small %>%
   filter(Cruise == "KEBABB") %>%              # 97 of Leg 2 samples from 186 in total
   # filter (`Depth [m]` <= 80) %>%            # top 65 meters leaves 73/97 Leg 2 samples, next deepest sample is at 115 m
@@ -179,6 +178,16 @@ hm = heatmap.2(as.matrix(proptab_leg2)^.2, trace="none", key=F, margins=c(20,30)
 dev.off()
 
 
+#################################
+### Cluster # + color palette ###
+k = 6                                                      # number of clusters you decided on
+
+# cluster_palette <- setNames(turbo(k), as.character(1:k))   # how you will color your clusters from now on
+# # turbo: an improved Jet rainbow color map for reducing false detail, banding and color blindness ambiguity
+
+cluster_palette <- c("#C832FF", "#002AFF", "#00FFFF", "#00FF00", "#FFD700", "#FF1900") %>%  # my custom palette in ODV for 6 clusters
+  setNames(as.character(1:k))
+
 ######################
 ### ComplexHeatmap ###
 
@@ -187,14 +196,12 @@ dev.off()
 # Compute Bray-Curtis distance and hierarchical clustering
 bray_dist <- function(x) vegdist(x, method = "bray")
 
-k = 6 # number of clusters you decided on
-
 tdist <- vegdist(as.matrix(proptab_leg2)^.2, method = "bray")
 ttree <- hclust(tdist, method = "ward.D2")
 
 # Make a dendrogram variable and color branches with Turbo
 row_dend <- as.dendrogram(ttree) %>%
-  dendextend::color_branches(., k = k, col = turbo(k))
+  dendextend::color_branches(., k = k, col = cluster_palette)
 
 #
 ## open pdf
@@ -211,7 +218,7 @@ amun_complex_hm <- Heatmap(as.matrix(proptab_leg2)^.2,
                            
                            # Row clustering with pre-computed dendrogram
                            cluster_rows = row_dend %>%
-                             set("branches_lwd", 3),                           # set branch line width for better visibility
+                             set("branches_lwd", 3),                             # set branch line width for better visibility
                            row_split = k,
                            
                            # Column clustering
@@ -298,10 +305,9 @@ for (i in 1:6) {
 }
 
 # Color the cluster row labels (samples) from top/first slice (later named as "Cluster 1") to the bottom/last (later named"Cluster k")
-cluster_palette <- turbo(k, alpha = 0.5)            # generate Turbo colors for clusters to color from top to bottom
 for (i in 1:k) {                                    # loop over cluster slices
   decorate_row_names("amun_complex_hm", {
-    grid.rect(gp = gpar(fill = cluster_palette[i]),
+    grid.rect(gp = gpar(fill = alpha(cluster_palette[i], 0.5)),    # transparency set at 0.5
               width = unit(13.3, "cm"),
               x = unit(1, "npc") + unit(0.6, "cm"),
               just = "center")
@@ -340,8 +346,6 @@ phylo <- as.phylo(ttree)
 # Open PDF with optimized dimensions
 pdf(file = "OUTPUT/Leg2/leg2_circ_dend.pdf", width = 8, height = 8)
 
-cluster_colors <- setNames(turbo(k), as.character(1:k))  # adjust cluster colors, the same one is defined in the heatmap and db-RDA
-
 # Create base circular tree with compact layout
 p <- ggtree(phylo, layout = 'circular', ladderize = TRUE, size = 0.8) %<+% cluster_data +
   geom_tree(aes(color = factor(cluster))) +                           # color branches by cluster
@@ -350,7 +354,7 @@ p <- ggtree(phylo, layout = 'circular', ladderize = TRUE, size = 0.8) %<+% clust
               offset = 0.5,                      # pushing labels outward
               align = TRUE,                      # prevent overlap
               show.legend = TRUE) +
-  scale_color_manual(name = "Cluster", values = cluster_colors,
+  scale_color_manual(name = "Cluster", values = cluster_palette,
                      guide = guide_legend(override.aes = list(size = 5))) +     # your predefined colors for clusters
   expand_limits(x = 5)                           # expands - smaller number means greater exppansion
 
@@ -551,9 +555,8 @@ sc_si <- scores(rda_model, display = "sites") %>%
   mutate(Cluster = as.factor(Cluster))
 
 # Define cluster colors
-cluster_levels <- levels(as.factor(metadata$Cluster))  # Get unique cluster numbers
-cluster_colors <- setNames(turbo(length(cluster_levels)), cluster_levels) # use turbo: better and can also use in ODV
-# turbo: an improved Jet rainbow color map for reducing false detail, banding and color blindness ambiguity
+cluster_levels <- levels(as.factor(metadata$Cluster))  # get unique cluster numbers
+cluster_colors <- cluster_palette[cluster_levels]      # assign cluster colors
 
 # Compute dynamic arrow scaling factor
 arrow_scaling_factor <- max(abs(c(sc_bp$dbRDA1, sc_bp$dbRDA2)), na.rm = TRUE) * 2
@@ -669,6 +672,36 @@ cluster_summary <- proptab_leg2 %>%
   print()
 
 
+############################################
+### Alpha-diversity (Shannon) by cluster ###
+# Shannon index: richness and evenness
+# The Shannon index formula inherently normalizes counts into proportions internally
+# Hence, you can use your relative abundances instead of raw ASV values - it makes no difference
+
+meta_leg2$Shannon <- vegan::diversity(proptab_leg2, index = "shannon")
+
+# Test for differences in richness as a function of cluster
+# The Kruskal-Wallis test can be thought of as the non-parametric equivalent to ANOVA
+kruskal <- kruskal.test(meta_leg2$Shannon ~ meta_leg2$Cluster) %>% print()
+
+shannon_fig <- ggplot(meta_leg2, aes(x = factor(Cluster), y = Shannon, fill = factor(Cluster))) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.5) +  
+  scale_fill_manual(values = cluster_palette) +    # use predefined cluster_palette colors
+  labs(title = paste0("Shannon diversity by Cluster (Kruskal-Wallis test p-value = ", formatC(kruskal$p.value, format = "e", digits = 2), ")"),
+       x = "Cluster",
+       y = "Shannon Diversity") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 50, face = "bold", hjust = 0.5, margin = margin(b = 20)),
+    axis.text = element_text(size = 16),
+    axis.title.x = element_text(size = 35, face = "bold"),
+    axis.title.y = element_text(size = 35, face = "bold"),
+    plot.margin = margin(t = 40, r = 60, b = 40, l = 60),
+    legend.position = "none"
+  )
+
+
 ########################
 ### Cluster analysis ###
 
@@ -697,7 +730,7 @@ asv_clus$Group.1 = NULL
 asv_dominant_clus <- rownames(asv_clus)[apply(asv_clus, 2, which.max)]
 
 # Define colors for cluster
-vertex_colors <- setNames(turbo(k), as.character(1:k))[asv_dominant_clus]
+vertex_colors <- cluster_palette[asv_dominant_clus]                      # assign cluster colors
 vertex_colors[is.na(vertex_colors)] <- "gray"                            # default color for unassigned ASVs
 
 # Out of the ASVs most associated with each cluster, extract top 10 by relative abundance
@@ -760,6 +793,21 @@ for (i in 1:k) {
 }
 
 #
+## Add alpha-diversity by Cluster (Shannon index)
+print(shannon_fig)
+
+#
+## Add the table with the most abundant ASVs specific to each cluster
+grid.arrange(textGrob("Most abundant Cluster-specific ASVs\n(>1% mean relative abundance)", 
+                      gp = gpar(fontsize = 28, fontface = "bold")),
+             grid.table(top_asv_clus, 
+                        rows = NULL,                                                          # remove row numbers
+                        theme = ttheme_default(
+                          core = list(fg_params = list(cex = 1.5)),                           # cell text size
+                          colhead = list(fg_params = list(cex = 1.8, fontface = "bold")))),   # column label size
+             nrow = 2, heights = c(0.2, 1))
+
+#
 ## Add the table with environmental parameter values specific to each cluster
 grid.arrange(textGrob("Cluster-specific values of defining environmental parameters", 
                       gp = gpar(fontsize = 35, fontface = "bold"),
@@ -770,18 +818,6 @@ grid.arrange(textGrob("Cluster-specific values of defining environmental paramet
                           core = list(fg_params = list(cex = 2.2)),                           # cell text size
                           colhead = list(fg_params = list(cex = 2.2, fontface = "bold")))),   # column label size
              nrow = 2, heights = c(0.2, 1))
-
-#
-# Add the table with the most abundant ASVs specific to each cluster
-grid.arrange(textGrob("Most abundant Cluster-specific ASVs\n(>1% mean relative abundance)", 
-                      gp = gpar(fontsize = 28, fontface = "bold")),
-             grid.table(top_asv_clus, 
-                        rows = NULL,                                                          # remove row numbers
-                        theme = ttheme_default(
-                          core = list(fg_params = list(cex = 1.5)),                           # cell text size
-                          colhead = list(fg_params = list(cex = 1.8, fontface = "bold")))),   # column label size
-             nrow = 2, heights = c(0.2, 1))
-
 
 ## close PDF
 dev.off()
