@@ -1,4 +1,16 @@
-.Rproj.user
+# Data and outputs
+/CTD/
+/DNA/
+/EXT/
+/OUT/
+
+# Local RStudio/Posit files
+/.posit/
+/.Rproj.user/
+/*.Rproj
+
+# R session files
 .Rhistory
 .RData
+.RDataTmp
 .Ruserdata
