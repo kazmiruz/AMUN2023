@@ -110,7 +110,7 @@ seqtab.16S <- seqtab.16S.raw[, rownames(tax.16S), drop = FALSE]
 #############################
 ### BLAST 18S against PR2 ###
 
-# Optional: load PR2 and the original BLAST hits below to rebuild EXT/hits_pr2_filt.rds.
+# PR2 reference data for the optional BLAST rerun below.
 # pr2 <- read_csv("EXT/PR2/pr2_version_5.1.1_merged.csv", show_col_types = FALSE)
 
 ## RUN THIS ONCE IF NEED TO BLAST AGAINST PR2 AGAIN ##
@@ -165,8 +165,6 @@ seqtab.16S <- seqtab.16S.raw[, rownames(tax.16S), drop = FALSE]
 # hits_pr2 <- predict_pr2(xs, db = db_pr2)   # takes 50 minutes
 # write_rds(hits_pr2, "EXT/hits_pr2.rds")
 
-# hits_pr2 <- read_rds("EXT/hits_pr2.rds")     # upload raw BLAST hits
-
 
 #################################
 ### Annotate and clean up 18S ###
@@ -174,18 +172,23 @@ seqtab.16S <- seqtab.16S.raw[, rownames(tax.16S), drop = FALSE]
 # PR2 taxonomy lookup
 ranks18 <- c("Domain", "Supergroup", "Division", "Subdivision", "Class", "Order", "Family", "Genus", "Species")
 ranks18_assign <- setdiff(ranks18, "Species")                            # assignments stop at Genus; species names remain reference information
+
+# # To regenerate taxonomic assignments (hits_pr2_filt), uncomment the block below.
+#
+# pr2 <- read_csv("EXT/PR2/pr2_version_5.1.1_merged.csv", show_col_types = FALSE)
+# hits_pr2 <- read_rds("EXT/hits_pr2.rds")     # load raw BLAST hits only to regenerate the saved assignments
 # ranks18_eff <- c("Genus", "Family", "Order", "Class", "Subdivision", "Division", "Supergroup")
 # pr2_tax <- pr2 %>% transmute(sseqid = pr2_accession, across(all_of(tolower(ranks18)))) %>% rename_with(str_to_title, all_of(tolower(ranks18)))
-
+#
 # # Earlier exploratory counts; not recomputed by this block
 # # 26545 original sequences -> 19433 are likely eukaryotes, out of which most (18044) have query coverage 100% and similarity ≥80%
 # # hits_pr2_filt$seq and conf_blast_18S$seqis are very similar (0.05% dif-ce), the latter resulting from cleaning using BLASTing against NCBI
-
+#
 # # qcovhsp = 100 -> 18014 (qcovs = 100 and qcovus = 100, the same reuslt as for qcov = (qend - qstart + 1) / nchar(seq) * 100, but rounded up)
 # # qcovus = 100 -> 18018  (qcovs = 100 here but qcovhsp could be <100)
 # # qcovs = 100 -> 18041   (qcovus and qcovhsp could be <100)
 # # none of query coverages ever exceed 100
-
+#
 # hits_pr2_filt <- hits_pr2 %>%
 #   filter(qcovhsp == 100, pident >= 80) %>%                              # retain alignments with 100% query coverage and ≥80% identity
 #   filter(bitscore == max(bitscore), .by = qseqid) %>%                   # highest bitscore per qseqid
@@ -193,7 +196,7 @@ ranks18_assign <- setdiff(ranks18, "Species")                            # assig
 #   filter(mismatch == min(mismatch), .by = qseqid) %>%                   # fewest mismatches
 #   filter(gapopen  == min(gapopen), .by = qseqid) %>%                    # fewest gap openings
 #   left_join(pr2_tax, by = "sseqid")                                     # join taxonomy only after removing lower-ranked alignments
-
+#
 # # Check whole columns instead of using rowwise()/c_across() separately within every ASV
 # eff_idx <- rep.int(length(ranks18_eff) + 1L, nrow(hits_pr2_filt))
 # eff_tax <- rep(NA_character_, nrow(hits_pr2_filt))
@@ -203,13 +206,13 @@ ranks18_assign <- setdiff(ranks18, "Species")                            # assig
 #   eff_idx[known] <- k
 #   eff_tax[known] <- v[known]
 # }
-
+#
 # hits_pr2_filt <- hits_pr2_filt %>% mutate(eff_idx = eff_idx, eff_tax = eff_tax) %>%
 #   filter(eff_idx == min(eff_idx), .by = qseqid) %>%                     # prefer the deepest resolved annotation among equally ranked alignments
 #   mutate(tax_n = n_distinct(sseqid), .by = c(qseqid, eff_tax)) %>%      # each reference gets one vote, even if it has multiple alignments
 #   filter(tax_n == max(tax_n), .by = qseqid) %>%                         # retain all equally frequent assignments at that rank
 #   mutate(across(all_of(ranks18_assign), ~ ifelse(str_detect(.x, "_X"), NA_character_, .x)))
-
+#
 # # Summarise all ASVs together; reference species are pooled but never enter selection or consensus
 # first_cols <- setdiff(names(hits_pr2_filt), c("qseqid", ranks18, "sseqid", "sstart", "send", "eff_idx", "eff_tax", "tax_n"))
 # hits_pr2_filt <- hits_pr2_filt %>% summarise(
@@ -221,7 +224,7 @@ ranks18_assign <- setdiff(ranks18, "Species")                            # assig
 #     taxon = ~ if (!anyNA(.x) && length(unique(.x)) == 1L) .x[1] else NA_character_,
 #     conflict = ~ length(unique(.x[!is.na(.x)])) > 1L), .names = "{.col}__{.fn}"), .by = qseqid) %>%
 #   rename_with(~ str_remove(.x, "__taxon$"), ends_with("__taxon"))
-
+#
 # # A conflict at any ancestral rank clears that rank and all lower ranks; an unresolved name alone is not a conflict
 # conflict <- as.matrix(hits_pr2_filt[paste0(ranks18_assign, "__conflict")])
 # blocked <- rep(FALSE, nrow(hits_pr2_filt))
