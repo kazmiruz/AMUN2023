@@ -138,7 +138,7 @@ coast_meta <- st_read("EXT/ne_10m/ne_10m_coastline.shp", quiet = TRUE) %>% st_tr
 # Amundsen Science CTD-rosette instrumentation:
 # Temperature, conductivity and pressure: Sea-Bird SBE-9plus CTD system.
 # Dissolved oxygen: Sea-Bird SBE-43; fChl-a: Seapoint chlorophyll fluorometer; fCDOM: Wet Labs FL(RT)D.
-# Optical nitrate: Satlantic MBARI-ISUS 5T; light transmission: Wet Labs C-Star transmissometer.
+# Optical nitrate: Sea-Bird SUNA (sn 1546); light transmission: Wet Labs C-Star transmissometer.
 # PAR and surface PAR are also included in the Amundsen Science archive.
 # Dataset/instrument metadata: https://erddap.amundsenscience.com/erddap/info/amundsen12713/index.html
 #
@@ -369,6 +369,30 @@ ctd.nut.amun <- ctd.amun %>% anti_join(cast_duplicates, by = c("Station", "Cast"
          `Nitrate (CTD) [uM]`, `Nitrate [uM]`, `Nitrite [uM]`, `Phosphate [uM]`, `Silicate [uM]`, `Nut bottle`, `Nut match`, all_of(nutrient_sources),
          `Dissolved oxygen [uM]`, `Distance to coast [km]`)
 
+# Downcast values at bottle pressures: medians within ±1 db of each bottle pressure in the same cast (downcast code = bottle column).
+qc_vars <- c(TE90 = "Temperature [deg C]", PSAL = "Salinity", OXYM = "Dissolved oxygen [uM]", NTRA = "Nitrate (CTD) [uM]",
+             FLOR = "fChl-a [mg/m^3]", CDOM = "fCDOM [mg/m^3]", TRAN = "Light transmission [%]")
+downcast_at_bottles <- function(btl) btl %>% distinct(Cruise, Cast, Bottle, `Pressure [db]`) %>%
+  mutate(p_lo = `Pressure [db]` - 1, p_hi = `Pressure [db]` + 1) %>%
+  inner_join(ctd.profile.all %>% select(Cruise, Cast, PRES, all_of(names(qc_vars))), by = join_by(Cruise, Cast, between(y$PRES, x$p_lo, x$p_hi))) %>%
+  group_by(Cruise, Cast, Bottle) %>% summarise(across(all_of(names(qc_vars)), ~ median(.x, na.rm = TRUE)), .groups = "drop")
+
+# Quality check: bottle (upcast) values against downcast values for all bottles; PAR is excluded because light differs between descent and ascent.
+# Leg 4 bottle fChl-a exceeds the processed downcasts by ~1.16 mg m-3 below 100 m, whereas the other variables agree in both legs.
+bottle_downcast <- ctd.amun %>% left_join(downcast_at_bottles(ctd.amun), by = c("Cruise", "Cast", "Bottle"))
+imap_dfr(qc_vars, \(btl_col, dc_col) bottle_downcast %>%
+           transmute(Cruise, Variable = btl_col, Below_100 = `Pressure [db]` > 100, Upcast = .data[[btl_col]], Downcast = .data[[dc_col]])) %>%
+  filter(is.finite(Upcast), is.finite(Downcast)) %>% group_by(Cruise, Variable) %>%
+  summarise(Bottles = n(), `Median difference` = median(Upcast - Downcast), `Median difference >100 db` = median((Upcast - Downcast)[Below_100]),
+            R2 = cor(Upcast, Downcast)^2, .groups = "drop") %>% mutate(across(where(is.double), ~ signif(.x, 3))) %>% print(n = Inf)
+
+# Sample fChl-a is taken from the downcast; Leg 2 bottles above the first downcast record keep the bottle value (Leg 2 bottle and downcast agree).
+# Bottle values are retained for reference.
+ctd.nut.amun <- ctd.nut.amun %>% left_join(downcast_at_bottles(ctd.nut.amun) %>% select(Cruise, Cast, Bottle, FLOR),
+                                           by = c("Cruise", "Cast", "Bottle"), relationship = "one-to-one") %>%
+  mutate(`fChl-a bottle [mg/m^3]` = `fChl-a [mg/m^3]`,
+         `fChl-a [mg/m^3]` = coalesce(FLOR, if_else(Cruise == "AM2023_02", `fChl-a bottle [mg/m^3]`, NA_real_))) %>% select(-FLOR)
+
 
 ######################################################################
 ### Attach DNA data to CTD/NUT data and add river-station metadata ###
@@ -391,7 +415,7 @@ river_metadata <- amun_sample_leg4_raw %>% filter(str_detect(Station, "^AMD")) %
             Time = as.character(`Sampling time`), `Depth [m]` = 0.5, `Distance to coast [km]`)
 
 # Final table contains only Genohub microbial samples; CTD/nutrient information comes from their corresponding sampled bottle and cast.
-# Station renaming is deliberately done HERE, after all source-based joins are finished, so the new transect codes cannot break data integration.
+# Station renaming is deliberately done HERE, after all source-based joins are finished, so the study transect codes cannot affect data integration.
 
 meta.amun.complete <- dna_cast_match %>%
   left_join(ctd.nut.amun, by = c("Cruise", "Station", "Cast", "Bottle", "Year", "Month"),
@@ -425,7 +449,7 @@ meta.amun.complete <- dna_cast_match %>%
                   "geo_loc_name", "Bottom depth [m]", "Target", "Bottle", "Sample label", "Year", "Month", "Day",
                   "Hour", "Minute", "Second", "Time", "DOY", "Depth [m]", "Pressure [db]", "Conservative temperature [deg C]",
                   "Temperature [deg C]", "Salinity", "Bottle salinity", "Density [kg/m^3]", "Sigma-t [kg/m^3]",
-                  "Sigma-theta [kg/m^3]", "fChl-a [mg/m^3]", "fCDOM [mg/m^3]",
+                  "Sigma-theta [kg/m^3]", "fChl-a [mg/m^3]", "fChl-a bottle [mg/m^3]", "fCDOM [mg/m^3]",
                   "Beam attenuation [1/m]", "Nitrate (CTD) [uM]", "Nitrate [uM]", "Nitrite [uM]", "Phosphate [uM]", "Silicate [uM]",
                   "Dissolved oxygen [uM]", "AOU [umol/kg]", "Nut bottle", "Nut match",
                   "Pycnocline depth [m]", "Chl-a maximum depth [m]",
@@ -486,7 +510,7 @@ sampling_map <- ggplot() +
   ggrepel::geom_label_repel(data = filter(station_xy, .group != "G"), aes(X, Y, label = Station), direction = "y", nudge_x = 6000,
                             hjust = 0, size = 2, fontface = "bold", fill = scales::alpha("white", .9), box.padding = .12,
                             point.padding = .08, force = .5, force_pull = 10, max.overlaps = Inf, segment.color = NA,
-                            label.padding = unit(.1, "lines"), label.r = unit(.08, "lines"), seed = 1) +
+                            label.padding = unit(.1, "lines"), label.r = unit(.08, "lines"), seed = 1, max.time = Inf) +
   geom_label(data = filter(station_xy, .group == "G"), aes(X, Y, label = Station), nudge_x = 5000, nudge_y = -15000, hjust = 0,
              size = 2, fontface = "bold", fill = scales::alpha("white", .9), label.padding = unit(.1, "lines"), label.r = unit(.08, "lines")) +
   scale_fill_brewer(name = NULL, palette = "Dark2") + guides(fill = guide_legend(nrow = 2, byrow = TRUE)) +

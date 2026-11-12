@@ -139,13 +139,15 @@ model_summary <- imap(models, \(m, nm) tibble(Model = nm, Samples = nrow(metadat
                                               `Explained variation (%)` = 100 * RsquareAdj(m)$adj.r.squared,
                                               `P (samples)` = test_p(m, perm), `P (whole stations)` = test_p(m, perm_station),
                                               `P (full candidates, samples)` = attr(m, "full_model_p"))) %>% list_rbind()
-# Report VIFs for the selected explanatory predictors in each fitted model.
-predictor_summary <- imap(models, \(m, nm)
-                          anova.cca(m, permutations = perm, by = "margin") %>% as.data.frame() %>% rownames_to_column("Predictor") %>%
-                            filter(Predictor != "Residual") %>%
-                            transmute(Model = nm, Parameter = coalesce(unname(env_labels_db[Predictor]), Predictor),
-                                      `Marginal contribution (%)` = 100 * SumOfSqs / m$tot.chi,
-                                      P = `Pr(>F)`, VIF = unname(vif.cca(m)[Predictor]))) %>% list_rbind()
+# Report marginal p-values under sample and whole-station permutations, and VIFs, for the selected predictors in each fitted model.
+predictor_summary <- imap(models, \(m, nm) {
+  p_station <- anova.cca(m, permutations = perm_station, by = "margin")
+  anova.cca(m, permutations = perm, by = "margin") %>% as.data.frame() %>% rownames_to_column("Predictor") %>%
+    filter(Predictor != "Residual") %>%
+    transmute(Model = nm, Parameter = coalesce(unname(env_labels_db[Predictor]), Predictor),
+              `Marginal contribution (%)` = 100 * SumOfSqs / m$tot.chi,
+              `P (samples)` = `Pr(>F)`, `P (whole stations)` = p_station[Predictor, "Pr(>F)"], VIF = unname(vif.cca(m)[Predictor]))
+}) %>% list_rbind()
 selection_steps <- imap(models, \(m, nm) as.data.frame(m$anova) %>% rownames_to_column("Step") %>%
                           transmute(Model = nm, Step, `Explained variation (%)` = 100 * R2.adj, `Entry p-value` = `Pr(>F)`)) %>% list_rbind()
 
@@ -166,7 +168,7 @@ fractions <- tibble(Fraction = c("Environment only", "Eukaryotes only", "Shared"
 present_clusters <- names(cluster_palette)[names(cluster_palette) %in% unique(as.character(metadata$Cluster))]
 present_phases <- sampling_periods[sampling_periods %in% unique(as.character(metadata$Sampling_period))]
 site_scores <- \(m) scores(m, display = "sites", choices = 1:2, scaling = 2)
-# Keep the existing +/-2 view unless changed inputs require more space to show every sample.
+# Axis limits are +/-2, extended in steps of 0.5 if any sample score falls outside.
 plot_limit <- max(2, ceiling((max(abs(c(site_scores(m_euk), site_scores(m_prok)))) + .05) * 2) / 2)
 reference <- site_scores(m_euk)
 f1 <- ifelse(c(mean(reference[as.character(metadata$Cluster) == "6", 1]),
@@ -193,7 +195,7 @@ make_db_plot <- function(m, title, flips) {
                  inherit.aes = FALSE, linewidth = .35, arrow = grid::arrow(length = grid::unit(.12, "cm"))) +
     geom_text_repel(data = bp, aes(dbRDA1 * arrow_scale, dbRDA2 * arrow_scale, label = Label),
                     inherit.aes = FALSE, size = 2, fontface = "bold", seed = 1, max.overlaps = Inf, lineheight = .9,
-                    box.padding = .2, point.padding = .1, nudge_y = label_nudge, force = 1.5, max.iter = 30000,
+                    box.padding = .2, point.padding = .1, nudge_y = label_nudge, force = 1.5, max.iter = 30000, max.time = Inf,
                     segment.colour = "grey40", segment.size = .2, xlim = c(-plot_limit, plot_limit), ylim = c(-plot_limit, plot_limit)) +
     scale_size_manual(values = plot_sizes[present_phases], guide = "none") +
     scale_fill_manual("Cluster", values = cluster_palette[present_clusters], breaks = present_clusters,

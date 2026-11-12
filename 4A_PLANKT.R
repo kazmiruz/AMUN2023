@@ -224,7 +224,6 @@ genus_taxonomy <- tibble(ASV = colnames(proptab.amun.original), ASV_id = str_ext
 
 # Assign each ASV to a major taxonomic group using the rules below.
 # These assignments determine which organisms are combined in Figure 4 and in major group summaries at the end of 6A_ENV.R.
-# Ecological notes below refer to the earlier non-rare summary; the optional group audit at the end of 6A recalculates them for original ASVs.
 all_asvs_tax <- tibble(ASV_full = colnames(proptab.amun.original)) %>% rownames_to_column() %>% rowwise() %>%
   mutate(bind_rows(parse_tax(ASV_full))) %>%
   ungroup() %>% mutate(ASV_id = str_extract(ASV_full, "ASV_\\d+$")) %>%
@@ -232,14 +231,14 @@ all_asvs_tax <- tibble(ASV_full = colnames(proptab.amun.original)) %>% rownames_
   transmute(ASV = ASV_full, Domain2 = if_else(Domain %in% c("Bacteria", "Archaea"), "Prokaryote", "Eukaryote"),
             Group = if_else(Domain == "Archaea", "Archaea",
                             case_when(
-                              # in these samples, Coscinodiscophyceae were completely absent from diatoms
+                              # in these samples, Coscinodiscophyceae contribute 0.009% of diatom abundance (two rare ASVs)
                               # 98 % of diatom abundance is Chaetoceros but Minidiscus and Thalassiosira also attain high relab of 10-25% in some samples
                               Class %in% c("Bacillariophyceae", "Mediophyceae", "Coscinodiscophyceae") ~ "Diatoms",
                               
                               # non-diatom Ochrophyta = selected non-diatom Gyrista classes; these include heterotrophs:
                               # in these samples, only Pelagophyceae, Chrysophyceae, Dictyochophyceae, Phaeophyceae, Bolidophyceae, and MOCH-2 were present,
                               # but other potential members are also listed for consistency if other studies would reuse the code
-                              # Pedinellales, the only order detected in Dictyochophyceae, is 71 % of all "non-diatom Ochrophyta"
+                              # Dictyochophyceae, mainly the PR2 family Pedinellales, are 71 % of all "non-diatom Ochrophyta"
                               # However, Chrysophyceae (golden algae) and Phaeophyceae (brown algae) also appear on the dotplot
                               Class %in% c("Pelagophyceae", "Chrysophyceae", "Dictyochophyceae", "Phaeophyceae","Bolidophyceae", "MOCH-2", 
                                            "Eustigmatophyceae", "Raphidophyceae", "Xanthophyceae") ~ "non-diatom Ochrophyta",
@@ -250,7 +249,7 @@ all_asvs_tax <- tibble(ASV_full = colnames(proptab.amun.original)) %>% rownames_
                               
                               Class == "Alphaproteobacteria" ~ "Alphaproteobacteria",   # split Proteobacteria into one class + 2 orders
                               Order == "Pseudomonadales" ~ "Pseudomonadales", Order == "Enterobacterales" ~ "Enterobacterales",
-                              Order == "Flavobacteriales" ~ "Flavobacteriales",         # 99.3 % of Bacteroidota and often mentioned in lit-re as such
+                              Order == "Flavobacteriales" ~ "Flavobacteriales",         # 98.8 % of Bacteroidota and often mentioned in literature as such
                               TRUE ~ str_replace(Phylum, "^uncl.\\s+", ""))))
 
 # Combine each sample's ASV abundances with its cluster membership and taxonomic assignments.
@@ -307,7 +306,7 @@ prok_colors <- c("Cyanobacteriota" = "#00BC00",                                 
 #        slice_max(Mean_pct, n = 1, by = Group) %>%
 #        arrange(desc(Mean_pct)))
 
-### ### Make a bar plots for major groups (once you have decided what to highlight)
+### ### Make bar plots for major groups (once you have decided what to highlight)
 
 # Formatting shared by all panels
 # Filter data to include ONLY the chosen groups in the stacked bar plot

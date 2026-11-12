@@ -27,7 +27,7 @@ library(cluster)                         # silhouette widths
 library(dendextend)                      # rotate and colour dendrograms
 library(vegan)                           # Bray-Curtis dissimilarity
 library(indicspecies)                    # indicator taxa analysis
-options("lifecycle_verbosity"="warning") # always get warnings if there are (not just once every 8 hours)
+options("lifecycle_verbosity"="warning") # show lifecycle warnings every time they occur
 # -------------------------------------------------------------------------
 
 ### ### Interpretation notes
@@ -207,7 +207,7 @@ dev.off()
 #                            duleg = FALSE, # If TRUE, Cluster combos aren't considered, only the original Clusters (1 to k, Dufrêne & Legendre, 1997)
 #                            max.order = 2, control = how(nperm = 9999))
 # attr(indicator_res, "input_hash") <- rlang::hash(list(proptab.amun, as.character(meta.amun$Cluster)))
-# write_rds(indicator_res, "EXT/indicator_res.rds")       # 8 previously defined clusters and pairs
+# write_rds(indicator_res, "EXT/indicator_res.rds")       # eight clusters and their pairs
 indicator_res <- read_rds("EXT/indicator_res.rds")
 # Check abundance values as well as ASV/sample names and cluster assignments.
 if (!identical(attr(indicator_res, "input_hash"), rlang::hash(list(proptab.amun, as.character(meta.amun$Cluster)))))
@@ -269,7 +269,7 @@ chosen_cluster <- map2_chr(chosen_group, rn, \(group, asv) {
 }) %>% set_names(rn)
 
 
-# Identify prevalent ASVs (>=2% RelAb in at least 2 sample), including prevalent bioindicators
+# Identify prevalent ASVs (>=2% RelAb in at least 2 samples), including prevalent bioindicators
 # This is a simple and unbiased logic, compared to gatekeeping ASVs according to their average abundance in the cluster or group of clusters they peak in
 thr_display <- 0.02; min_samples_display <- 2L
 display_n <- colSums(as.matrix(proptab.amun) >= thr_display, na.rm = TRUE)
@@ -301,7 +301,6 @@ draw_amun_complex_hm <- function() {
           col = viridis(256),
           cluster_rows = dend_row_order,
           cluster_columns = dend_col_order,
-          # column_split = tax_k,
           right_annotation = rowAnnotation(
             # bar1 = anno_points(log1p(meta.amun$`Distance to coast [km]`), size = unit(3, "mm"), width = unit(2.6, "cm"),
             #                    axis_param = list(at = log1p(c(0, 25, 250)), labels = c(0, 25, 250), labels_rot = 0, gp = gpar(fontsize = 10))),
@@ -376,20 +375,14 @@ draw_amun_complex_hm <- function() {
   #               gp = gpar(fontsize = 27, fontface = "bold"))
   #   }, slice = i)
   # }
-  # for (i in seq_along(com_labels)) {
-  #   decorate_column_names("amun_complex_hm", {
-  #     grid.text(com_labels[i], y = unit(1, "npc") - unit(2.5, "cm"), just = "bottom",
-  #               gp = gpar(fontsize = 25, fontface = "bold.italic"))
-  #   }, slice = i)
-  # }
   
   annotation_labels <- list(
     list(name = "Θ", unit = expression(bold("(" * degree * "C)"))),
     list(name = "S", unit = NULL),
     list(name = "fChl-a", unit = expression(bold("(mg m"^{-3} * ")"))),
     list(name = "fCDOM", unit = expression(bold("(mg m"^{-3} * ")"))),
-    list(name = "Nitrate", unit = expression(bold("(uM)"))),
-    list(name = "Nitrite", unit = expression(bold("(uM)"))))
+    list(name = "Nitrate", unit = expression(bold("(µM)"))),
+    list(name = "Nitrite", unit = expression(bold("(µM)"))))
   
   for (i in seq_along(annotation_labels)) {
     decorate_annotation(paste0("bar", i), {
@@ -414,7 +407,7 @@ cairo_pdf(file = "OUT/3A_CLUS/amun_complex_hm.pdf", width = 32, height = 27)
 draw_amun_complex_hm()
 dev.off()
 
-png("OUT/3A_CLUS/amun_complex_hm.png", width = 32, height = 27, units = "in", res = 300, type = "cairo")
+png("OUT/3A_CLUS/amun_complex_hm.png", width = 32, height = 27, units = "in", res = 1000, type = "cairo")
 draw_amun_complex_hm()                       # calls the function which includes all decorations
 dev.off()
 

@@ -2,18 +2,20 @@
 #
 # Purpose:
 # Map sampling stations and clusters (Figures 1-2) and compare environmental conditions (Figure 3).
-# Assemble Tables S1-S7 in one supplementary workbook and save abundance summaries for Results and Discussion.
+# Assemble Tables S1-S8 in one supplementary workbook and save abundance summaries for Results and Discussion.
+# Table S8 matches prevalent bioindicators by sequence to the bioindicators of southern Hudson Bay and James Bay.
 # Save the metadata and shared settings loaded by 7A_dbRDA.R.
 #
 # Inputs (paths are relative to the project working directory containing EXT, OUT and DNA):
-# EXT/meta.amun.rds; EXT/proptab.amun.original.rds; EXT/proptab.amun.rds (2A)
+# EXT/meta.amun.rds; EXT/proptab.amun.original.rds; EXT/proptab.amun.rds; EXT/amun_taxonomy.rds (2A)
 # EXT/amun_clustering.rds; EXT/amun_bioindicators.rds (3A)
 # EXT/amun_shannon_diversity.rds; EXT/amun_shannon_statistics.rds; EXT/amun_composition.rds (4A)
 # EXT/ne_10m/ shapefiles; EXT/marmap/marmap_coord_-96;59;-52;78_res_4.csv
+# EXT/WK2022-23_bioindicators.csv (bioindicators of Kazmiruk and Collins, 2026, with ASV sequences; same DADA2 run)
 #
 # Outputs:
-# OUT/6A_ENV/amun_station_map.png; amun_clusters_combined.pdf / .png; amun_environment_by_cluster.png (Figures 1-3)
-# OUT/6A_ENV/Supplementary materials Tables S1-S7.xlsx (one tab per supplementary table)
+# OUT/6A_ENV/amun_station_map.png; amun_clusters_combined.png; amun_environment_by_cluster.png (Figures 1-3)
+# OUT/6A_ENV/Supplementary materials Tables S1-S8.xlsx (one tab per supplementary table)
 # OUT/6A_ENV/amun_group_summaries.xlsx; amun_genera_summaries.xlsx; amun_bioindicator_summaries.xlsx
 # EXT/amun_environment_setup.rds -> metadata, scales, colours and symbols used by 7A_dbRDA.R
 #
@@ -39,6 +41,7 @@ save_tables <- function(tables, file) {
   decimal <- createStyle(numFmt = "0.0"); integer <- createStyle(numFmt = "0"); scientific <- createStyle(numFmt = "0.0E+00")
   for (sheet in names(tables)) {
     d <- as.data.frame(tables[[sheet]]) %>% mutate(across(where(is.character), ~ na_if(str_trim(.x), "")))
+    names(d) <- str_replace_all(names(d), c("\\[uM\\]" = "[µM]", "\\[deg C\\]" = "[°C]", "\\[mg/m\\^3\\]" = "[mg m⁻³]", "\\[deg\\]" = "[°]"))  # SI unit symbols in exported headers
     addWorksheet(wb, sheet)
     writeDataTable(wb, sheet, d, tableStyle = "TableStyleMedium2", withFilter = TRUE, keepNA = TRUE, na.string = "NA")
     freezePane(wb, sheet, firstRow = TRUE, firstCol = TRUE)
@@ -102,7 +105,7 @@ meta.amun$Cluster <- clustering$clus[rownames(meta.amun)]
 
 seed <- 161193
 depth_levels <- c("Surface (1–6 m)", "Subsurface (9–55 m)", "Intermediate (56–200 m)", "Deep (>225 m)")
-# Cutoffs separate the four sampled bands; their display names reflect the observed ranges (there are no 201-225 m samples).
+# Cutoffs separate the four sampled bands; their display names give bounds that enclose the observed depths (there are no 201-225 m samples).
 depth_cutoffs <- c(6, 55, 200)
 depth_axis_breaks <- c(1, 6, 25, 55, 100, 200, 500, 1000, 2000)
 sampling_periods <- c("Leg 2.1", "Leg 2.2", "Leg 2.3", "Leg 4")
@@ -272,7 +275,7 @@ p_locator <- ggrastr::rasterise(map_base, layers = c("Tile", "Sf"), dpi = 300) +
   ggrepel::geom_label_repel(data = station_labels, aes(`Longitude [deg]`, `Latitude [deg]`, label = Station),
                             direction = "y", nudge_x = 0.12, hjust = 0, size = 6.5, fontface = "bold", colour = "red4",
                             fill = scales::alpha("white", 0.92), box.padding = 0.08, point.padding = 0.05,
-                            label.padding = unit(0.10, "lines"), force = 0.2, force_pull = 20, max.iter = 30000,
+                            label.padding = unit(0.10, "lines"), force = 0.2, force_pull = 20, max.iter = 30000, max.time = Inf,
                             max.overlaps = Inf, segment.colour = NA, seed = seed) +
   scale_shape_manual(values = sampling_shapes, breaks = sampling_periods, drop = FALSE, name = "Phase",
                      guide = guide_legend(order = 1, title.position = "top", title.hjust = 0, keyheight = unit(0.7, "cm"), keywidth = unit(0.7, "cm"),
@@ -294,7 +297,7 @@ ggsave("OUT/6A_ENV/amun_station_map.png", p_locator, width = 14, height = 14.5, 
 ### SAMPLE CLUSTERS ACROSS SPACE AND DEPTH ###
 # Relate the fitted communities to geography, sampling phases, profile features and recent waves (Results 3.1).
 # Uses: Saved sample dendrogram; meta_grouped; map_base and p_inset from the preceding map section.
-# Produces: OUT/6A_ENV/amun_clusters_combined.png / .pdf (Figure 2).
+# Produces: OUT/6A_ENV/amun_clusters_combined.png (Figure 2).
 
 figure2_sizes <- 1.4 * sampling_sizes
 
@@ -552,8 +555,44 @@ shannon_environment <- meta_grouped %>% select(Sample, all_of(sample_env_vars)) 
             n, `ρ` = rho, `BH-adjusted p-value` = Q) %>% arrange(Domain, `BH-adjusted p-value`)
 
 
-###################################################
-### SAVE SUPPLEMENTARY MATERIALS TABLES S1-S7 ###
+################################################################
+### TABLE S8: BIOINDICATORS SHARED WITH HUDSON BAY-JAMES BAY ###
+# Both surveys were processed in one DADA2 run, so identical sequences are the same ASVs.
+# Cluster layers follow the depth layers of Figure 2: CL3-CL7 upper water clusters, CL1 and CL8 deeper clusters, CL2 both (mixed).
+# In Kazmiruk and Collins (2026), dBI and dJB are subsurface clusters; oHB, BI22, cHB, EST, MR, nJB and sJB are surface clusters.
+# That survey used the same multipatt IndVal.g analysis with A >= 0.6, B >= 0.6 and p < 0.01; its prevalent bioindicators
+# reached >= 1.5% mean RA in their cluster. Layers are listed upper before mixed before deeper, and surface before subsurface.
+wk_bioindicators <- read_csv("EXT/WK2022-23_bioindicators.csv", show_col_types = FALSE)
+asv_sequences <- readRDS("EXT/amun_taxonomy.rds")
+asv_sequences <- bind_rows(asv_sequences$asv16.original, asv_sequences$asv18.original) %>% select(ASV, Sequence)
+cluster_layer <- c(CL3 = "Upper", CL4 = "Upper", CL5 = "Upper", CL6 = "Upper", CL7 = "Upper", CL2 = "Mixed", CL1 = "Deeper", CL8 = "Deeper")
+wk_layer <- c(oHB = "Surface", BI22 = "Surface", cHB = "Surface", EST = "Surface", MR = "Surface", nJB = "Surface", sJB = "Surface",
+              dBI = "Subsurface", dJB = "Subsurface")
+pattern_layers <- \(pattern, key) map_chr(str_split(pattern, "\\+"), \(m) paste(intersect(unique(key), key[m]), collapse = " + "))
+
+# Pairs list the cluster with the higher mean RA first, as in Figure 5 and the text.
+shared_bioindicators <- readRDS("EXT/amun_bioindicators.rds")$selected_asv_tbl %>%
+  transmute(Label = ASV, ASV = str_extract(Label, "ASV_\\d+$"), Taxon = str_trim(str_extract(Label, "[^;]+(?=;\\s*ASV_\\d+$)")),
+            Domain = if_else(str_detect(Label, "^Eukaryota;"), "Eukaryote", "Prokaryote"),
+            Clusters = map2_chr(as.character(Pattern), as.character(cluster),
+                                \(g, first) paste0("CL", c(first, setdiff(str_extract_all(g, "\\d+")[[1]], first)), collapse = "+")),
+            `Cluster layers` = pattern_layers(Clusters, cluster_layer)) %>%
+  left_join(asv_sequences, by = "ASV") %>% left_join(wk_bioindicators, by = "Sequence") %>%
+  transmute(ASV, Taxon, Domain, Clusters, `Cluster layers`,
+            `Hudson Bay-James Bay bioindicator` = WK_ASV, `Hudson Bay-James Bay clusters` = WK_clusters,
+            `Hudson Bay-James Bay layers` = if_else(is.na(WK_clusters), NA_character_, pattern_layers(coalesce(WK_clusters, "oHB"), wk_layer)),
+            `Prevalent in Hudson Bay-James Bay` = if_else(is.na(WK_ASV), NA_character_, if_else(WK_prevalent, "Yes", "No")), Sequence) %>%
+  arrange(Domain, Clusters, ASV)
+
+### ### Counts reported in Results 3.3
+shared_only <- shared_bioindicators %>% filter(!is.na(`Hudson Bay-James Bay bioindicator`))
+print(count(shared_bioindicators, `Cluster layers`))
+print(shared_bioindicators %>% filter(`Cluster layers` == "Upper + Deeper") %>% count(Clusters))
+print(count(shared_only, `Cluster layers`, `Hudson Bay-James Bay layers`))
+
+
+#################################################
+### SAVE SUPPLEMENTARY MATERIALS TABLES S1-S8 ###
 # This is the only supplementary-table export; 2A and 4A retain their RDS outputs for reuse here.
 # Tables S2-S3 retain the original RA fractions (0-1), not percentages, with no renormalization.
 supplementary_tables <- list(
@@ -564,8 +603,9 @@ supplementary_tables <- list(
   "Table S5" = environment_dunn,
   "Table S6" = readRDS("EXT/amun_shannon_statistics.rds")$tukey %>%
     select(Domain, `Direction of difference`, `Tukey-adjusted p-value`),
-  "Table S7" = shannon_environment)
-save_tables(supplementary_tables, "OUT/6A_ENV/Supplementary materials Tables S1-S7.xlsx")
+  "Table S7" = shannon_environment,
+  "Table S8" = shared_bioindicators)
+save_tables(supplementary_tables, "OUT/6A_ENV/Supplementary materials Tables S1-S8.xlsx")
 
 
 ###################################################
@@ -578,8 +618,10 @@ save_tables(supplementary_tables, "OUT/6A_ENV/Supplementary materials Tables S1-
 
 composition <- readRDS("EXT/amun_composition.rds")
 bioindicators <- readRDS("EXT/amun_bioindicators.rds")
+# Pairs list the cluster with the higher mean RA first, as in Figure 5 and the text.
 indicator_key <- bioindicators$selected_asv_tbl %>%
-  transmute(ASV = str_extract(ASV, "ASV_[0-9]+$"), Pattern = str_replace_all(paste0("CL", Pattern), fixed("+"), "+CL"))
+  transmute(ASV = str_extract(ASV, "ASV_[0-9]+$"),
+            Pattern = map2_chr(Pattern, as.character(cluster), \(g, first) paste0("CL", c(first, setdiff(str_split(g, "[-+]")[[1]], first)), collapse = "+")))
 sample_asvs <- composition$sample_asvs %>%
   transmute(Sample, Domain = Domain2, Group, Genus, ASV = str_extract(ASV, "ASV_[0-9]+$"), RelAb)
 groupings <- list(Cluster = "Cluster", `Station group` = "Station group", Layer = "Layer", `Station group-Layer` = c("Station group", "Layer"))

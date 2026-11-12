@@ -62,8 +62,8 @@ W_READS <- 0.065
 W_SAMPLE <- 0.075
 
 # Spacer widths (relative). GAP_SMALL can be negative to tighten.
-GAP_MED <- -0.002   # gap between Euk and Prok dotplots (go negative if no reaction)
-GAP_SMALL <- -0.007 # small gaps between oceanography columns on the right side (go negative if no reaction)
+GAP_MED <- -0.002   # gap between Euk and Prok dotplots
+GAP_SMALL <- -0.007 # small gaps between oceanography columns on the right side
 
 # ASV label placement (labels drawn *inside* dot-panels at y = 0.5)
 LABEL_SIZE <- 30 * S
@@ -88,7 +88,7 @@ label_total_reads_ticks <- function(breaks) { sapply(breaks, \(b) if (is.na(b)) 
                                                      else if (b == 100000) "10⁵" else "") }
 
 get_visual_mapping <- function(RelAb) {
-  list(alpha = if_else(RelAb <= 0.25, 1 + 0 * (RelAb / 0.25), 1),
+  list(alpha = rep(1, length(RelAb)),                                # all symbols fully opaque
        size = S * if_else(RelAb <= 0.25, 2 + 8 * sqrt(RelAb / 0.25),
                           case_when(RelAb <= 0.50 ~ 8.6, RelAb <= 0.75 ~ 12.4, TRUE ~ 11.4)),
        shape = case_when(RelAb <= 0.25 ~ 16L, RelAb <= 0.50 ~ 17L,
@@ -249,7 +249,7 @@ build_main_row <- function(proptab.amun) {
   
   dat_plot <- dat_all %>% filter(RelAb > 0)
   
-  # Compute per-ASV cluster with maximum mean abundance (avoids dplyr slice issues)
+  # Compute per-ASV cluster with maximum mean abundance
   asv_max_clus <- dat_all %>%
     group_by(ASV, Cluster) %>%
     summarise(mean_rel = mean(RelAb, na.rm = TRUE), .groups = "drop") %>%

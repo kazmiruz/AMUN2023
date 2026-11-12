@@ -98,7 +98,7 @@ tax.16S <- tax.16S.raw %>%
   mutate(across(all_of(ranks16), \(x) {                                         # assign NA to bootstrap < 80 and names containing Incertae Sedis or Unknown
     b <- str_extract(x, "(?<=\\[)\\d+(?=\\])") %>% as.integer()
     x <- ifelse(b < 80, NA_character_, x)
-    x <- ifelse(str_detect(x, "Incertae Sedis|Unknown|Candidatus Nitrosoarchaeum"), NA_character_, x)    # Candidatus Nitrosoarchaeum is a bug, should be NA
+    x <- ifelse(str_detect(x, "Incertae Sedis|Unknown|Candidatus Nitrosoarchaeum"), NA_character_, x)    # Candidatus Nitrosoarchaeum is treated as unresolved (SILVA 138.2 release notes)
     x
   })) %>%
   filter(!is.na(Domain)) %>% 
@@ -180,14 +180,8 @@ ranks18_assign <- setdiff(ranks18, "Species")                            # assig
 # ranks18_eff <- c("Genus", "Family", "Order", "Class", "Subdivision", "Division", "Supergroup")
 # pr2_tax <- pr2 %>% transmute(sseqid = pr2_accession, across(all_of(tolower(ranks18)))) %>% rename_with(str_to_title, all_of(tolower(ranks18)))
 #
-# # Earlier exploratory counts; not recomputed by this block
-# # 26545 original sequences -> 19433 are likely eukaryotes, out of which most (18044) have query coverage 100% and similarity ≥80%
-# # hits_pr2_filt$seq and conf_blast_18S$seqis are very similar (0.05% dif-ce), the latter resulting from cleaning using BLASTing against NCBI
-#
-# # qcovhsp = 100 -> 18014 (qcovs = 100 and qcovus = 100, the same reuslt as for qcov = (qend - qstart + 1) / nchar(seq) * 100, but rounded up)
-# # qcovus = 100 -> 18018  (qcovs = 100 here but qcovhsp could be <100)
-# # qcovs = 100 -> 18041   (qcovus and qcovhsp could be <100)
-# # none of query coverages ever exceed 100
+# # qcovhsp is the query coverage of a single alignment, equal to (qend - qstart + 1) / nchar(seq) * 100 rounded up;
+# # qcovs and qcovus pool all alignments to the same subject. No query coverage exceeds 100.
 #
 # hits_pr2_filt <- hits_pr2 %>%
 #   filter(qcovhsp == 100, pident >= 80) %>%                              # retain alignments with 100% query coverage and ≥80% identity
@@ -283,7 +277,7 @@ sam.16S.pick <- match(meta.amun$plate.geno, plates.16S); sam.18S.pick <- match(m
 ## AMUN-only count tables (still with sequences as colnames); remove ASVs absent from every AMUN sample collected using non-sequential filtration
 tab.16S <- seqtab.16S[sam.16S.pick, , drop = FALSE]; tab.18S <- seqtab.18S[sam.18S.pick, , drop = FALSE]
 tab.16S <- tab.16S[, colSums(tab.16S) > 0, drop = FALSE]; tab.18S <- tab.18S[, colSums(tab.18S) > 0, drop = FALSE]
-# ncol(tab.16S) # how many 16S ASVs originally?  5625
+# ncol(tab.16S) # how many 16S ASVs originally?  5588
 # ncol(tab.18S) # how many 18S ASVs originally?   710
 # much lower prokaryotic and eukaryotic diversity than in WK due to the latter being sampled across a broader environmental and salinity gradient
 
